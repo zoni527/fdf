@@ -13,6 +13,7 @@
 NAME		:= fdf
 
 CC		:= cc
+DEBUGFLAGS	:= -g
 CFLAGS		:= -Wall -Wextra -Werror
 RM		:= rm -f
 DEBUG		:=
@@ -28,21 +29,22 @@ LIBFTDIR	:= ./lib/libft
 LIBFT		:= $(LIBFTDIR)/libft.a
 LIBFTH		:= $(LIBFTDIR)/libft.h
 LIBMLXDIR	:= ./lib/MLX42
-INC		:= -I$(LIBFTDIR) -I$(INCDIR) -I $(LIBMLXDIR)/include
+LIBMLX		:= $(LIBMLXDIR)/build/libmlx42.a -ldl -lglfw -pthread -lm
+INC		:= -I $(LIBFTDIR) -I $(INCDIR) -I $(LIBMLXDIR)/include
 
 all: $(NAME) libmlx
 
 $(NAME): $(OBJ) $(LIBFT) $(LIBFTH)
-	$(CC) $(CFLAGS) $(INC) $(OBJ) $(LIBFT) -o $@ $(DEBUG)
+	$(CC) $(CFLAGS) $(OBJ) $(LIBFT) $(LIBMLX) $(INC) -o $@ $(DEBUG)
 
-liblmx:
+libmlx:
 	cmake $(LIBMLXDIR) -B $(LIBMLXDIR)/build && make -C $(LIBMLXDIR)/build -j4
 
 $(LIBFT):
-	make $(LIBFT) -C $(LIBFTDIR)
+	make all -C $(LIBFTDIR)
 
 %.o: %.c
-	$(CC) -c $< -o $@ $(DEBUG)
+	$(CC) -c $< -o $@ $(INC) $(DEBUG)
 
 clean:
 	make clean -C $(LIBFTDIR)
