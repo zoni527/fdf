@@ -10,14 +10,14 @@
 #                                                                              #
 # **************************************************************************** #
 
-NAME	:= libft.a
+NAME		:= libft.a
 
-CC	:= cc
-CFLAGS	:= -Wall -Wextra -Werror
-AR	:= ar -crs
-DEBUG	:=
+CC		:= cc
+CFLAGS		:= -Wall -Wextra -Werror
+AR		:= ar -crs
+DEBUGFLAGS	:= -g
 
-HF	:= libft.h
+HF		:= libft.h
 
 SRC :=	ft_isalpha.c	ft_isdigit.c	ft_isalnum.c	ft_isascii.c	\
 	ft_isprint.c	ft_strlen.c	ft_memset.c	ft_bzero.c	\
@@ -52,7 +52,8 @@ SRC :=	ft_isalpha.c	ft_isdigit.c	ft_isalnum.c	ft_isascii.c	\
 	skip_whitespace.c	skip_char.c	\
 	larger_int.c	smaller_int.c	\
 	first_int_larger.c	first_int_smaller.c	\
-	ft_iabs.c
+	ft_iabs.c	\
+	valid_multinumberstring.c
 
 OBJ	:= $(SRC:.c=.o)
 
@@ -62,7 +63,7 @@ $(NAME): $(OBJ) $(HF)
 	$(AR) $(NAME) $(OBJ)
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@ $(DEBUG)
+	$(CC) $(CFLAGS) -c $< -o $@
 clean:
 	rm -f $(OBJ)
 
@@ -71,4 +72,7 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: clean fclean re
+debug: CFLAGS += $(DEBUGFLAGS)
+debug: re
+
+.PHONY: clean fclean re debug

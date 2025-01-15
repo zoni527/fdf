@@ -30,6 +30,14 @@
 #  define HEX_BASE_UPPER_CASE "0123456789ABCDEF"
 # endif
 
+# ifndef TRUE
+#  define TRUE 1
+# endif
+
+# ifndef FALSE
+#  define FALSE 0
+# endif
+
 int			ft_isalpha(int c);
 int			ft_isdigit(int c);
 int			ft_isalnum(int c);
@@ -169,5 +177,7 @@ int			first_int_larger(int a, int b);
 int			first_int_smaller(int a, int b);
 
 int			ft_iabs(int num);
+
+int			valid_multinumberstring(char *str);
 
 #endif

@@ -32,7 +32,6 @@ char	*get_next_line(int fd)
 	ssize_t			newline_index;
 
 	line = NULL;
-	buffer = NULL;
 	initialize(buffers, &buffer, fd);
 	if (!buffer)
 		return (NULL);
@@ -44,7 +43,11 @@ char	*get_next_line(int fd)
 		if (buffer->eof && buffer->unflushed_bytes > 0)
 			return (flush_and_combine(buffer, buffer->unflushed_bytes, line));
 		if (buffer->eof && buffer->unflushed_bytes == 0)
+		{
+			if (line == NULL)
+				ft_memset(buffer, 0, sizeof(t_buffer));
 			return (line);
+		}
 		line = flush_and_combine(buffer, buffer->unflushed_bytes, line);
 		read_into_buffer(buffer);
 	}
@@ -56,6 +59,7 @@ static void	initialize(t_buffer *buffers, t_buffer **buffer, int fd)
 {
 	size_t	i;
 
+	*buffer = NULL;
 	i = 0;
 	while (i < FILE_LIMIT)
 	{

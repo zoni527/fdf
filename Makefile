@@ -21,7 +21,9 @@ DEBUG		:=
 SRCDIR		:= ./src
 INCDIR		:= ./include
 
-SRC	:=	$(SRCDIR)/fdf.c
+SRC	:=	$(SRCDIR)/fdf.c \
+		$(SRCDIR)/map_handling.c \
+		$(SRCDIR)/matrix.c
 
 OBJ		:= $(SRC:.c=.o)
 
@@ -29,15 +31,16 @@ LIBFTDIR	:= ./lib/libft
 LIBFT		:= $(LIBFTDIR)/libft.a
 LIBFTH		:= $(LIBFTDIR)/libft.h
 LIBMLXDIR	:= ./lib/MLX42
-LIBMLX		:= $(LIBMLXDIR)/build/libmlx42.a -ldl -lglfw -pthread -lm
+LIBMLX		:= $(LIBMLXDIR)/build/libmlx42.a
+LIBMLXFLAGS	:= -ldl -lglfw -pthread -lm
 INC		:= -I $(LIBFTDIR) -I $(INCDIR) -I $(LIBMLXDIR)/include
 
-all: $(NAME) libmlx
+all: $(NAME)
 
-$(NAME): $(OBJ) $(LIBFT) $(LIBFTH)
-	$(CC) $(CFLAGS) $(OBJ) $(LIBFT) $(LIBMLX) $(INC) -o $@ $(DEBUG)
+$(NAME): $(OBJ) $(LIBFT) $(LIBFTH) $(LIBMLX)
+	$(CC) $(CFLAGS) $(OBJ) $(LIBFT) $(LIBMLX) $(LIBMLXFLAGS) $(INC) -o $@ $(DEBUG)
 
-libmlx:
+$(LIBMLX):
 	cmake $(LIBMLXDIR) -B $(LIBMLXDIR)/build && make -C $(LIBMLXDIR)/build -j4
 
 $(LIBFT):
@@ -52,8 +55,15 @@ clean:
 
 fclean: clean
 	make fclean -C $(LIBFTDIR)
+	rm $(LIBMLX)
 	$(RM) $(NAME)
 
 re: fclean all
 
-.PHONY: clean fclean re all phony libmlx
+debug: CFLAGS += $(DEBUGFLAGS)
+debug: libftdebug re
+
+libftdebug:
+	make debug -C $(LIBFTDIR)
+
+.PHONY: clean fclean re all phony debug libftdebug
