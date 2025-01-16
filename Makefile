@@ -47,7 +47,7 @@ $(LIBFT):
 	make all -C $(LIBFTDIR)
 
 %.o: %.c
-	$(CC) -c $< -o $@ $(INC) $(DEBUG)
+	$(CC) $(CFLAGS) -c $< -o $@ $(INC)
 
 clean:
 	make clean -C $(LIBFTDIR)
@@ -61,9 +61,10 @@ fclean: clean
 re: fclean all
 
 debug: CFLAGS += $(DEBUGFLAGS)
-debug: libftdebug re
+debug: fclean libftdebug all
 
 libftdebug:
+	make fclean -C $(LIBFTDIR)
 	make debug -C $(LIBFTDIR)
 
 .PHONY: clean fclean re all phony debug libftdebug

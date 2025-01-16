@@ -18,7 +18,7 @@ int	create_matrix_elements(t_matrix *m)
 
 	m->elem = ft_calloc(m->rows, sizeof(int *));
 	if (!m->elem)
-		return (FAIL);
+		return (FAILURE);
 	i = -1;
 	while (++i < m->rows)
 	{
@@ -26,13 +26,13 @@ int	create_matrix_elements(t_matrix *m)
 		if (!m->elem[i])
 		{
 			free_matrix_elements(m);
-			return (FAIL);
+			return (FAILURE);
 		}
 	}
 	return (SUCCESS);
 }
 
-void	fill_matrix_row(t_matrix *m, int row, char *line)
+void	fill_matrix_row(t_matrix *m, int row, const char *line)
 {
 	int		i;
 
@@ -55,7 +55,7 @@ void	free_matrix_elements(t_matrix *m)
 	m->rows = 0;
 }
 
-void	print_matrix(t_matrix *m)
+void	print_matrix(const t_matrix *m)
 {
 	int	i;
 	int	j;

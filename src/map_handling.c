@@ -22,17 +22,17 @@ int	validate_map_file(const char *file_name)
 	fd = open(file_name, O_RDONLY);
 	line = get_next_line(fd);
 	if (fd < 0 || !line)
-		return (FAIL);
+		return (FAILURE);
 	wc_o = word_count(line);
 	if (!wc_o)
-		return (FAIL);
+		return (FAILURE);
 	while (line)
 	{
 		if (!valid_multinumberstring(line))
-			return (free_ptr_return_int((void *)&line, FAIL));
+			return (free_ptr_return_int((void *)&line, FAILURE));
 		wc = word_count(line);
 		if (wc != wc_o)
-			return (free_ptr_return_int((void *)&line, FAIL));
+			return (free_ptr_return_int((void *)&line, FAILURE));
 		free(line);
 		line = get_next_line(fd);
 	}
@@ -49,17 +49,17 @@ int	parse_map_file(const char *file_name, t_matrix *m)
 	fd = open(file_name, O_RDONLY);
 	line = get_next_line(fd);
 	if (m->rows <= 0 || fd < 0 || !line)
-		return (FAIL);
+		return (FAILURE);
 	m->cols = word_count(line);
-	if (create_matrix_elements(m) == FAIL)
-		return (free_ptr_return_int((void *)&line, FAIL));
+	if (create_matrix_elements(m) == FAILURE)
+		return (free_ptr_return_int((void *)&line, FAILURE));
 	i = -1;
 	while (++i < m->rows)
 	{
 		if (!line)
 		{
 			free_matrix_elements(m);
-			return (FAIL);
+			return (FAILURE);
 		}
 		fill_matrix_row(m, i, line);
 		free(line);

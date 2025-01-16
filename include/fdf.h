@@ -28,20 +28,26 @@
 # define BLACK	0x000000FF
 
 # define SUCCESS	0
-# define FAIL		-1
+# define FAILURE	-1
 
-typedef struct s_p3
+typedef struct s_dp3
 {
 	double	x;
 	double	y;
 	double	z;
-}	t_p3;
+}	t_dp3;
 
-typedef struct s_p2
+typedef struct s_ip2
 {
 	int	x;
 	int	y;
-}	t_p2;
+}	t_ip2;
+
+typedef struct s_dp2
+{
+	int	x;
+	int	y;
+}	t_dp2;
 
 typedef struct s_matrix
 {
@@ -49,6 +55,13 @@ typedef struct s_matrix
 	int	cols;
 	int	**elem;
 }	t_matrix;
+
+typedef struct s_tmatrix
+{
+	int		rows;
+	int		cols;
+	double	**elem;
+}	t_tmatrix;
 
 typedef struct s_linvars
 {
@@ -59,12 +72,26 @@ typedef struct s_linvars
 	int		step_y;
 }	t_linvars;
 
-typedef struct s_p3arr
+typedef struct s_dp3arr
 {
 	int			rows;
 	int			cols;
-	t_p3	**points;
-}	t_p3arr;
+	t_dp3	**points;
+}	t_dp3arr;
+
+typedef struct s_dp2arr
+{
+	int			rows;
+	int			cols;
+	t_dp2	**points;
+}	t_dp2arr;
+
+typedef struct s_ip2arr
+{
+	int			rows;
+	int			cols;
+	t_ip2	**points;
+}	t_ip2arr;
 
 /*----------------------------------------------------------------------------*/
 /*                             map_handling.c                                 */
@@ -76,10 +103,10 @@ int		count_rows(const char *file_name);
 /*                                matrix.c                                    */
 /*----------------------------------------------------------------------------*/
 int		create_matrix_elements(t_matrix *m);
-void	fill_matrix_row(t_matrix *m, int row, char *line);
+void	fill_matrix_row(t_matrix *m, int row, const char *line);
 void	free_matrix_elements(t_matrix *m);
-void	print_matrix(t_matrix *m);
+void	print_matrix(const t_matrix *m);
 /*----------------------------------------------------------------------------*/
-int	create_points(t_p3arr *points, t_matrix *matrix);
+int	create_points(t_dp3arr *points, const t_matrix *matrix);
 /*----------------------------------------------------------------------------*/
 #endif
