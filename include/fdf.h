@@ -18,8 +18,8 @@
 # include <math.h>
 # include <fcntl.h>
 
-# define WIDTH	1024
-# define HEIGHT	1024
+# define WIDTH	2048
+# define HEIGHT	2048
 
 # define RED	0xFF0000FF
 # define GREEN	0x00FF00FF
@@ -45,8 +45,8 @@ typedef struct s_ip2
 
 typedef struct s_dp2
 {
-	int	x;
-	int	y;
+	double	x;
+	double	y;
 }	t_dp2;
 
 typedef struct s_matrix

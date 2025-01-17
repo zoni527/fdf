@@ -34,10 +34,11 @@ LIBMLXDIR	:= ./lib/MLX42
 LIBMLX		:= $(LIBMLXDIR)/build/libmlx42.a
 LIBMLXFLAGS	:= -ldl -lglfw -pthread -lm
 INC		:= -I $(LIBFTDIR) -I $(INCDIR) -I $(LIBMLXDIR)/include
+FDFH		:= $(INCDIR)/fdf.h
 
 all: $(NAME)
 
-$(NAME): $(OBJ) $(LIBFT) $(LIBFTH) $(LIBMLX)
+$(NAME): $(OBJ) $(LIBFT) $(LIBFTH) $(LIBMLX) $(FDFH)
 	$(CC) $(CFLAGS) $(OBJ) $(LIBFT) $(LIBMLX) $(LIBMLXFLAGS) $(INC) -o $@ $(DEBUG)
 
 $(LIBMLX):
@@ -46,7 +47,7 @@ $(LIBMLX):
 $(LIBFT):
 	make all -C $(LIBFTDIR)
 
-%.o: %.c
+%.o: %.c $(FDFH)
 	$(CC) $(CFLAGS) -c $< -o $@ $(INC)
 
 clean:

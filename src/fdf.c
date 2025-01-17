@@ -34,12 +34,28 @@ void		rotate_points(t_dp3arr *points_array, double rx, double ry, double rz);
 
 void		center_points(t_dp3arr *points_array);
 
+int			create_view(t_dp2arr *view, t_dp3arr *world);
+void		y_plane_projection(t_dp2arr *view, t_dp3arr *world);
+void		free_view(t_dp2arr *view);
+
+void		rotate_view(t_dp2arr *view, double rot);
+void		scale_view(t_dp2arr *view, double multiplier);
+void		offset_view(t_dp2arr *view, t_dp2 *offset);
+void		view_to_image(t_ip2arr *pixels, t_dp2arr *view,
+					   int window_width, int window_height);
+
+int			create_pixels(t_ip2arr *pixels, const t_matrix *map);
+void		draw_map(t_ip2arr *pix, t_matrix *map, mlx_image_t *img);
+void		free_pixels(t_ip2arr *pixels);
+
 int	main(int argc, char *argv[])
 {
 	mlx_t		*mlx;
 	mlx_image_t	*img;
 	t_matrix	map;
-	t_dp3arr		points;
+	t_dp3arr	world;
+	t_dp2arr	view;
+	t_ip2arr	pixels;
 
 	if (argc != 2)
 		return (write_error_return_int("Usage: ./fdf <file_name>", 1));
@@ -50,28 +66,47 @@ int	main(int argc, char *argv[])
 	if (parse_map_file(argv[1], &map) == FAILURE)
 		return (write_error_return_int("ERROR: failed to parse file", 1));
 	print_matrix(&map);
-	if (create_points(&points, &map) == FAILURE)
+	if (create_points(&world, &map) == FAILURE)
 	{
 		free_matrix_elements(&map);
-		return (write_error_return_int("ERROR: failed to create 3D points", 1));
+		return (write_error_return_int("ERROR: failed to allocate world", 1));
 	}
-	center_points(&points);
+	center_points(&world);
+	rotate_points(&world, M_PI / 6, M_PI / 6, M_PI / 6);
+	scale_points(&world, 0.5);
+	if (create_view(&view, &world) == FAILURE)
+	{
+		free_points(&world);
+		free_matrix_elements(&map);
+		return (write_error_return_int("ERROR: failed to allocate view", 1));
+	}
+	y_plane_projection(&view, &world);
+	if (create_pixels(&pixels, &map) == FAILURE)
+	{
+		free_view(&view);
+		free_points(&world);
+		free_matrix_elements(&map);
+		return (write_error_return_int("ERROR: failed to allocate pixels", 1));
+	}
+	view_to_image(&pixels, &view, WIDTH, HEIGHT);
 	mlx = mlx_init(WIDTH, HEIGHT, "fdf", 1);
 	if (!mlx)
 	{
 		free_matrix_elements(&map);
-		free_points(&points);
+		free_points(&world);
 		return (write_error_return_int("ERROR: couldn't init mlx", 1));
 	}
 	img = mlx_new_image(mlx, WIDTH, HEIGHT);
 	if (!img || mlx_image_to_window(mlx, img, 0, 0) < 0)
 		return (free_ptr_return_int((void *)&mlx, 1));
-	fill_with_color(img, RED | GREEN);
-	draw_test_reticle(img, BLACK);
+	fill_with_color(img, BLACK);
+	draw_map(&pixels, &map, img);
 	mlx_loop(mlx);
 	mlx_terminate(mlx);
 	free_matrix_elements(&map);
-	free_points(&points);
+	free_points(&world);
+	free_view(&view);
+	free_pixels(&pixels);
 	return (0);
 }
 
@@ -90,12 +125,25 @@ void	draw_segment(mlx_image_t *img, t_ip2 p1, t_ip2 p2, int rgba)
 			mlx_put_pixel(img, p1.x, (int)(p1.y + i * l.step_y), rgba);
 		return ;
 	}
-	while (++i < l.delta_x + 1)
+	if (l.slope <= 1)
 	{
-		x = p1.x + i * l.step_x;
-		y = (int)(p1.y + i * l.step_y * l.slope);
-		if (x >= 0 && x < (int)img->width && y >= 0 && y < (int)img->height)
-			mlx_put_pixel(img, x, y, rgba);
+		while (++i < ft_iabs(l.delta_x) + 1)
+		{
+			x = p1.x + i * l.step_x;
+			y = (int)(p1.y + i * l.step_y * l.slope);
+			if (x >= 0 && x < (int)img->width && y >= 0 && y < (int)img->height)
+				mlx_put_pixel(img, x, y, rgba);
+		}
+	}
+	else
+	{
+		while (++i < ft_iabs(l.delta_y) + 1)
+		{
+			y = p1.y + i * l.step_y;
+			x = (int)(p1.x + i * l.step_x * 1 / l.slope);
+			if (x >= 0 && x < (int)img->width && y >= 0 && y < (int)img->height)
+				mlx_put_pixel(img, x, y, rgba);
+		}
 	}
 }
 
@@ -222,8 +270,8 @@ void	assign_points(t_dp3arr *points_array, const t_matrix *matrix)
 		j = -1;
 		while (++j < points_array->cols)
 		{
-			points_array->points[i][j].x = i;
-			points_array->points[i][j].y = j;
+			points_array->points[i][j].x = j;
+			points_array->points[i][j].y = i;
 			points_array->points[i][j].z = matrix->elem[i][j];
 		}
 	}
@@ -267,18 +315,37 @@ void	rotate_point(t_dp3 *point, double rx, double ry, double rz)
 	t_tmatrix	y_rot;
 	t_tmatrix	z_rot;
 
-	x_rot.elem = (double **)(double [3][3]){
-	{1, 0, 0},
-	{0, cos(rx), -sin(rx)},
-	{0, sin(rx), cos(rx)}};
-	y_rot.elem = (double **)(double [3][3]){
-	{cos(ry), 0, sin(ry)},
-	{0, 1, 0},
-	{-sin(ry), 0, cos(ry)}};
-	z_rot.elem = (double **)(double [3][3]){
-	{cos(rz), -sin(rz), 0},
-	{sin(rz), cos(rz), 0},
-	{0, 0, 1}};
+//	x_rot.elem = (double **)(double [3][3]){
+//	{1, 0, 0},
+//	{0, cos(rx), -sin(rx)},
+//	{0, sin(rx), cos(rx)}};
+
+	x_rot.elem = (double *[]){
+	(double []){1, 0, 0},
+	(double []){0, cos(rx), -sin(rx)},
+	(double []){0, sin(rx), cos(rx)}
+	};
+
+//	y_rot.elem = (double **)(double [3][3]){
+//	{cos(ry), 0, sin(ry)},
+//	{0, 1, 0},
+//	{-sin(ry), 0, cos(ry)}};
+
+	y_rot.elem = (double *[]){
+	(double []){cos(ry), 0, sin(ry)},
+	(double []){0, 1, 0},
+	(double []){-sin(ry), 0, cos(ry)}};
+
+//	z_rot.elem = (double **)(double [3][3]){
+//	{cos(rz), -sin(rz), 0},
+//	{sin(rz), cos(rz), 0},
+//	{0, 0, 1}};
+
+	z_rot.elem = (double *[]){
+	(double []){cos(rz), -sin(rz), 0},
+	(double []){sin(rz), cos(rz), 0},
+	(double []){0, 0, 1}};
+
 	matrix_transform(point, &x_rot);
 	matrix_transform(point, &y_rot);
 	matrix_transform(point, &z_rot);
@@ -349,18 +416,18 @@ void	center_points(t_dp3arr *arr)
 	i = 1;
 	while (i < (size_t)(arr->cols * arr->rows))
 	{
-		if (arr->points[i / arr->rows][i % arr->cols].x < min_x)
-			min_x = arr->points[i / arr->rows][i % arr->cols].x;
-		if (arr->points[i / arr->rows][i % arr->cols].x > max_x)
-			max_x = arr->points[i / arr->rows][i % arr->cols].x;
-		if (arr->points[i / arr->rows][i % arr->cols].y < min_y)
-			min_y = arr->points[i / arr->rows][i % arr->cols].y;
-		if (arr->points[i / arr->rows][i % arr->cols].y > max_y)
-			max_y = arr->points[i / arr->rows][i % arr->cols].y;
-		if (arr->points[i / arr->rows][i % arr->cols].z < min_z)
-			min_z = arr->points[i / arr->rows][i % arr->cols].z;
-		if (arr->points[i / arr->rows][i % arr->cols].z > max_z)
-			max_z = arr->points[i / arr->rows][i % arr->cols].z;
+		if (arr->points[i / arr->cols][i % arr->cols].x < min_x)
+			min_x = arr->points[i / arr->cols][i % arr->cols].x;
+		if (arr->points[i / arr->cols][i % arr->cols].x > max_x)
+			max_x = arr->points[i / arr->cols][i % arr->cols].x;
+		if (arr->points[i / arr->cols][i % arr->cols].y < min_y)
+			min_y = arr->points[i / arr->cols][i % arr->cols].y;
+		if (arr->points[i / arr->cols][i % arr->cols].y > max_y)
+			max_y = arr->points[i / arr->cols][i % arr->cols].y;
+		if (arr->points[i / arr->cols][i % arr->cols].z < min_z)
+			min_z = arr->points[i / arr->cols][i % arr->cols].z;
+		if (arr->points[i / arr->cols][i % arr->cols].z > max_z)
+			max_z = arr->points[i / arr->cols][i % arr->cols].z;
 		i++;
 	}
 	offset = (t_dp3){
@@ -368,6 +435,40 @@ void	center_points(t_dp3arr *arr)
 		.y = - (max_y + min_y) / 2,
 		.z = - (max_z + min_z) / 2};
 	offset_points(arr, offset);
+}
+
+int		create_view(t_dp2arr *view, t_dp3arr *world)
+{
+	int	i;
+
+	view->rows = world->rows;
+	view->cols = world->cols;
+	view->points = ft_calloc(world->rows, sizeof(t_dp2 *));
+	if (!view->points)
+		return (FAILURE);
+	i = -1;
+	while (++i < world->rows)
+	{
+		view->points[i] = ft_calloc(world->cols, sizeof(t_dp2));
+		if (!view->points[i])
+		{
+			free_view(view);
+			return (FAILURE);
+		}
+	}
+	return (SUCCESS);
+
+}
+
+void	free_view(t_dp2arr *view)
+{
+	if (view->rows)
+		while (view->rows--)
+			free(view->points[view->rows]);
+	free(view->points);
+	view->points = NULL;
+	view->cols = 0;
+	view->rows = 0;
 }
 
 void	y_plane_projection(t_dp2arr *view, t_dp3arr *world)
@@ -445,13 +546,128 @@ void	offset_view(t_dp2arr *view, t_dp2 *offset)
 	}
 }
 
-void	view_to_image(t_ip2arr *pixels, const t_dp2arr *view,
+void	view_to_image(t_ip2arr *pixels, t_dp2arr *view,
 				   int window_width, int window_height)
 {
-	int	offset_x;
-	int	offset_y;
+	int		offset_x;
+	int		offset_y;
+	t_dp2	offset;
+	int		i;
+	int		j;
+	double	max_x;
+	double	max_y;
+	double	min_x;
+	double	min_y;
+	double	width_x;
+	double	width_y;
+	double	multiplier_x;
+	double	multiplier_y;
 
+	rotate_view(view, M_PI);
+	min_x = view->points[0][0].x;
+	max_x = view->points[0][0].x;
+	min_y = view->points[0][0].y;
+	max_y = view->points[0][0].y;
+	i = -1;
+	while (++i < view->rows)
+	{
+		j = -1;
+		while (++j < view->cols)
+		{
+			if (min_x > view->points[i][j].x)
+				min_x = view->points[i][j].x;
+			if (max_x < view->points[i][j].x)
+				max_x = view->points[i][j].x;
+			if (min_y > view->points[i][j].y)
+				min_y = view->points[i][j].y;
+			if (max_y < view->points[i][j].y)
+				max_y = view->points[i][j].y;
+		}
+	}
+	width_x = max_x - min_x;
+	width_y = max_y - min_y;
+	if (width_x == 0)
+		multiplier_x = 100;
+	else
+		multiplier_x = WIDTH / width_x;
+	if (width_y == 0)
+		multiplier_y = 100;
+	else
+		multiplier_y = WIDTH / width_x;
+	if (multiplier_x < multiplier_y)
+		scale_view(view, multiplier_x);
+	else
+		scale_view(view, multiplier_y);
 	offset_x = window_width / 2;
 	offset_y = window_height / 2;
-	
+	offset = (t_dp2){.x = offset_x, .y = offset_y};
+	offset_view(view, &offset);
+	i = -1;
+	while (++i < pixels->rows)
+	{
+		j = -1;
+		while (++j < pixels->cols)
+		{
+			pixels->points[i][j].x = (int)view->points[i][j].x;
+			pixels->points[i][j].y = (int)view->points[i][j].y;
+		}
+	}
+}
+
+int		create_pixels(t_ip2arr *pixels, const t_matrix *map)
+{
+	int	i;
+
+	pixels->rows = map->rows;
+	pixels->cols = map->cols;
+	pixels->points = ft_calloc(map->rows, sizeof(t_ip2 *));
+	if (!pixels->points)
+		return (FAILURE);
+	i = -1;
+	while (++i < map->rows)
+	{
+		pixels->points[i] = ft_calloc(map->cols, sizeof(t_ip2));
+		if (!pixels->points[i])
+		{
+			free_pixels(pixels);
+			return (FAILURE);
+		}
+	}
+	return (SUCCESS);
+}
+
+void	free_pixels(t_ip2arr *pixels)
+{
+	if (pixels->rows)
+		while (pixels->rows--)
+			free(pixels->points[pixels->rows]);
+	free(pixels->points);
+	pixels->points = NULL;
+	pixels->cols = 0;
+	pixels->rows = 0;
+}
+
+void	draw_map(t_ip2arr *pix, t_matrix *map, mlx_image_t *img)
+{
+	int	i;
+	int	j;
+
+	i = -1;
+	while (++i < map->rows - 1)
+	{
+		j = -1;
+		while (++j < map->cols - 1)
+		{
+			draw_segment(img, pix->points[i][j], pix->points[i + 1][j], WHITE);
+			draw_segment(img, pix->points[i][j], pix->points[i][j + 1], WHITE);
+		}
+	}
+	j = map->cols -1;
+	i = -1;
+	while (++i < map->rows - 1)
+		draw_segment(img, pix->points[i][j], pix->points[i + 1][j], WHITE);
+	i = map->rows - 1;
+	j = -1;
+	while (++j < map->cols - 1)
+		draw_segment(img, pix->points[i][j], pix->points[i][j + 1], WHITE);
 }
