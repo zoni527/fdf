@@ -11,18 +11,18 @@
 /* ************************************************************************** */
 
 #include "../include/fdf.h"
-#include <fcntl.h>
 
-void		draw_segment(mlx_image_t *img, t_ip2 p1, t_ip2 p2, int rgba);
-void		fill_with_color(mlx_image_t *img, int rgba);
+void		draw_segment(mlx_image_t *img, t_ip2 p1, t_ip2 p2,
+				   unsigned int rgba);
+void		fill_with_color(mlx_image_t *img, unsigned int rgba);
 void		draw_test_reticle(mlx_image_t *img, int rgba);
 t_linvars	calculate_linvars(t_ip2 p1, t_ip2 p2);
 
-int			create_points(t_dp3arr *points_array, const t_matrix *matrix);
-void		assign_points(t_dp3arr *points_array, const t_matrix *matrix);
+int			create_points(t_dp3arr *points_array, const t_imatrix *matrix);
+void		assign_points(t_dp3arr *points_array, const t_imatrix *matrix);
 void		free_points(t_dp3arr *points_array);
 
-void		matrix_transform(t_dp3 *p, t_tmatrix *t);
+void		matrix_transform(t_dp3 *p, t_dmatrix *t);
 
 void		offset_point(t_dp3 *point, t_dp3 offset);
 void		rotate_point(t_dp3 *point, double rx, double ry, double rz);
@@ -44,73 +44,72 @@ void		offset_view(t_dp2arr *view, t_dp2 *offset);
 void		view_to_image(t_ip2arr *pixels, t_dp2arr *view,
 					   int window_width, int window_height);
 
-int			create_pixels(t_ip2arr *pixels, const t_matrix *map);
-void		draw_map(t_ip2arr *pix, t_matrix *map, mlx_image_t *img);
+int			create_pixels(t_ip2arr *pixels, const t_imatrix *map);
+void		draw_map(t_ip2arr *pix, t_imatrix *map, mlx_image_t *img);
 void		free_pixels(t_ip2arr *pixels);
+
+void		free_data(t_fdf_data *data);
+void		free_print_exit(t_fdf_data *data, const char *error);
 
 int	main(int argc, char *argv[])
 {
-	mlx_t		*mlx;
-	mlx_image_t	*img;
-	t_matrix	map;
-	t_dp3arr	world;
-	t_dp2arr	view;
-	t_ip2arr	pixels;
+	t_fdf_data	data;
 
 	if (argc != 2)
 		return (write_error_return_int("Usage: ./fdf <file_name>", 1));
-	ft_memset(&map, 0, sizeof(map));
+	ft_memset(&data, 0, sizeof(t_fdf_data));
 	if (validate_map_file(argv[1]))
 		return (write_error_return_int("ERROR: invalid map file, "
 				"check the file name and/or formatting", 1));
-	if (parse_map_file(argv[1], &map) == FAILURE)
+	if (parse_map_file(argv[1], &data.map) == FAILURE)
 		return (write_error_return_int("ERROR: failed to parse file", 1));
-	print_matrix(&map);
-	if (create_points(&world, &map) == FAILURE)
-	{
-		free_matrix_elements(&map);
-		return (write_error_return_int("ERROR: failed to allocate world", 1));
-	}
-	center_points(&world);
-	rotate_points(&world, M_PI / 6, M_PI / 6, M_PI / 6);
-	scale_points(&world, 0.5);
-	if (create_view(&view, &world) == FAILURE)
-	{
-		free_points(&world);
-		free_matrix_elements(&map);
-		return (write_error_return_int("ERROR: failed to allocate view", 1));
-	}
-	y_plane_projection(&view, &world);
-	if (create_pixels(&pixels, &map) == FAILURE)
-	{
-		free_view(&view);
-		free_points(&world);
-		free_matrix_elements(&map);
-		return (write_error_return_int("ERROR: failed to allocate pixels", 1));
-	}
-	view_to_image(&pixels, &view, WIDTH, HEIGHT);
-	mlx = mlx_init(WIDTH, HEIGHT, "fdf", 1);
-	if (!mlx)
-	{
-		free_matrix_elements(&map);
-		free_points(&world);
-		return (write_error_return_int("ERROR: couldn't init mlx", 1));
-	}
-	img = mlx_new_image(mlx, WIDTH, HEIGHT);
-	if (!img || mlx_image_to_window(mlx, img, 0, 0) < 0)
-		return (free_ptr_return_int((void *)&mlx, 1));
-	fill_with_color(img, BLACK);
-	draw_map(&pixels, &map, img);
-	mlx_loop(mlx);
-	mlx_terminate(mlx);
-	free_matrix_elements(&map);
-	free_points(&world);
-	free_view(&view);
-	free_pixels(&pixels);
+	print_matrix(&data.map);
+	if (create_points(&data.world, &data.map) == FAILURE)
+		free_print_exit(&data, "ERROR: failed to allocate world");
+	center_points(&data.world);
+	rotate_points(&data.world, M_PI / 6, M_PI / 6, M_PI / 6);
+	scale_points(&data.world, 0.5);
+	if (create_view(&data.view, &data.world) == FAILURE)
+		free_print_exit(&data, "ERROR: failed to allocate view");
+	y_plane_projection(&data.view, &data.world);
+	if (create_pixels(&data.pixels, &data.map) == FAILURE)
+		free_print_exit(&data, "ERROR: failed to allocate pixels");
+	view_to_image(&data.pixels, &data.view, WIDTH, HEIGHT);
+	data.mlx = mlx_init(WIDTH, HEIGHT, "fdf", 1);
+	if (!data.mlx)
+		free_print_exit(&data, "ERROR: couldn't initiate mlx");
+	data.img = mlx_new_image(data.mlx, WIDTH, HEIGHT);
+	if (!data.img)
+		free_print_exit(&data, "ERROR: couldn't create image");
+	if (mlx_image_to_window(data.mlx, data.img, 0, 0) < 0)
+		free_print_exit(&data, "ERROR: couldn't draw image");
+	fill_with_color(data.img, BLACK);
+	draw_map(&data.pixels, &data.map, data.img);
+	mlx_loop(data.mlx);
+	mlx_terminate(data.mlx);
+	free_data(&data);
 	return (0);
 }
 
-void	draw_segment(mlx_image_t *img, t_ip2 p1, t_ip2 p2, int rgba)
+void	free_print_exit(t_fdf_data *data, const char *error)
+{
+	free_data(data);
+	ft_memset(data, 0, sizeof(t_fdf_data));
+	ft_putstr_fd(error, STDERR_FILENO);
+	ft_putstr_fd("\n", STDERR_FILENO);
+	exit(EXIT_FAILURE);
+}
+
+void	free_data(t_fdf_data *data)
+{
+	free_matrix_elements(&data->map);
+	free_points(&data->world);
+	free_view(&data->view);
+	free_pixels(&data->pixels);
+}
+
+void	draw_segment(mlx_image_t *img, t_ip2 p1, t_ip2 p2,
+				  unsigned int rgba)
 {
 	t_linvars	l;
 	int			i;
@@ -220,7 +219,7 @@ void	draw_test_reticle(mlx_image_t *img, int rgba)
 	draw_segment(img, p1, p2, rgba);
 }
 
-void	fill_with_color(mlx_image_t *img, int rgba)
+void	fill_with_color(mlx_image_t *img, unsigned int rgba)
 {
 	int		w;
 	int		h;
@@ -231,12 +230,12 @@ void	fill_with_color(mlx_image_t *img, int rgba)
 	i = 0;
 	while (i < (size_t)(w * h))
 	{
-		mlx_put_pixel(img, i % w, (i / w) % h, rgba);
+		mlx_put_pixel(img, i % w, i / w, rgba);
 		i++;
 	}
 }
 
-int	create_points(t_dp3arr *points_array, const t_matrix *matrix)
+int	create_points(t_dp3arr *points_array, const t_imatrix *matrix)
 {
 	int	i;
 
@@ -259,7 +258,7 @@ int	create_points(t_dp3arr *points_array, const t_matrix *matrix)
 	return (SUCCESS);
 }
 
-void	assign_points(t_dp3arr *points_array, const t_matrix *matrix)
+void	assign_points(t_dp3arr *points_array, const t_imatrix *matrix)
 {
 	int	i;
 	int	j;
@@ -302,7 +301,7 @@ void	scale_point(t_dp3 *point, double multiplier)
 	point->z *= multiplier;
 }
 
-void	matrix_transform(t_dp3 *p, t_tmatrix *t)
+void	matrix_transform(t_dp3 *p, t_dmatrix *t)
 {
 	p->x = t->elem[0][0] * p->x + t->elem[0][1] * p->y + t->elem[0][2] * p->z;
 	p->y = t->elem[1][0] * p->x + t->elem[1][1] * p->y + t->elem[1][2] * p->z;
@@ -311,41 +310,23 @@ void	matrix_transform(t_dp3 *p, t_tmatrix *t)
 
 void	rotate_point(t_dp3 *point, double rx, double ry, double rz)
 {
-	t_tmatrix	x_rot;
-	t_tmatrix	y_rot;
-	t_tmatrix	z_rot;
-
-//	x_rot.elem = (double **)(double [3][3]){
-//	{1, 0, 0},
-//	{0, cos(rx), -sin(rx)},
-//	{0, sin(rx), cos(rx)}};
+	t_dmatrix	x_rot;
+	t_dmatrix	y_rot;
+	t_dmatrix	z_rot;
 
 	x_rot.elem = (double *[]){
 	(double []){1, 0, 0},
 	(double []){0, cos(rx), -sin(rx)},
 	(double []){0, sin(rx), cos(rx)}
 	};
-
-//	y_rot.elem = (double **)(double [3][3]){
-//	{cos(ry), 0, sin(ry)},
-//	{0, 1, 0},
-//	{-sin(ry), 0, cos(ry)}};
-
 	y_rot.elem = (double *[]){
 	(double []){cos(ry), 0, sin(ry)},
 	(double []){0, 1, 0},
 	(double []){-sin(ry), 0, cos(ry)}};
-
-//	z_rot.elem = (double **)(double [3][3]){
-//	{cos(rz), -sin(rz), 0},
-//	{sin(rz), cos(rz), 0},
-//	{0, 0, 1}};
-
 	z_rot.elem = (double *[]){
 	(double []){cos(rz), -sin(rz), 0},
 	(double []){sin(rz), cos(rz), 0},
 	(double []){0, 0, 1}};
-
 	matrix_transform(point, &x_rot);
 	matrix_transform(point, &y_rot);
 	matrix_transform(point, &z_rot);
@@ -614,7 +595,7 @@ void	view_to_image(t_ip2arr *pixels, t_dp2arr *view,
 	}
 }
 
-int		create_pixels(t_ip2arr *pixels, const t_matrix *map)
+int		create_pixels(t_ip2arr *pixels, const t_imatrix *map)
 {
 	int	i;
 
@@ -647,7 +628,7 @@ void	free_pixels(t_ip2arr *pixels)
 	pixels->rows = 0;
 }
 
-void	draw_map(t_ip2arr *pix, t_matrix *map, mlx_image_t *img)
+void	draw_map(t_ip2arr *pix, t_imatrix *map, mlx_image_t *img)
 {
 	int	i;
 	int	j;

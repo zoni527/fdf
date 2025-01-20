@@ -12,7 +12,7 @@
 
 #include "../include/fdf.h"
 
-int	create_matrix_elements(t_matrix *m)
+int	create_matrix_elements(t_imatrix *m)
 {
 	int	i;
 
@@ -32,7 +32,7 @@ int	create_matrix_elements(t_matrix *m)
 	return (SUCCESS);
 }
 
-void	fill_matrix_row(t_matrix *m, int row, const char *line)
+void	fill_matrix_row(t_imatrix *m, int row, const char *line)
 {
 	int		i;
 
@@ -44,7 +44,7 @@ void	fill_matrix_row(t_matrix *m, int row, const char *line)
 	}
 }
 
-void	free_matrix_elements(t_matrix *m)
+void	free_matrix_elements(t_imatrix *m)
 {
 	if (m->rows)
 		while (m->rows--)
@@ -55,7 +55,7 @@ void	free_matrix_elements(t_matrix *m)
 	m->rows = 0;
 }
 
-void	print_matrix(const t_matrix *m)
+void	print_matrix(const t_imatrix *m)
 {
 	int	i;
 	int	j;

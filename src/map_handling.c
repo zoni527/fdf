@@ -12,6 +12,8 @@
 
 #include "../include/fdf.h"
 
+void	free_from_index(t_fdf_data *d, int i);
+
 int	validate_map_file(const char *file_name)
 {
 	int		wc_o;
@@ -28,33 +30,32 @@ int	validate_map_file(const char *file_name)
 		return (FAILURE);
 	while (line)
 	{
-		if (!valid_multinumberstring(line))
-			return (free_ptr_return_int((void *)&line, FAILURE));
 		wc = word_count(line);
 		if (wc != wc_o)
 			return (free_ptr_return_int((void *)&line, FAILURE));
 		free(line);
 		line = get_next_line(fd);
 	}
+	close(fd);
 	return (SUCCESS);
 }
 
-int	parse_map_file(const char *file_name, t_matrix *m)
+int	parse_map_file(const char *file_name, t_fdf_data *d)
 {
 	char	*line;
 	int		fd;
 	int		i;
 
-	m->rows = count_rows(file_name);
-	fd = open(file_name, O_RDONLY);
+	d->rows = count_rows(file_name);
+	d->fd = open(file_name, O_RDONLY);
 	line = get_next_line(fd);
-	if (m->rows <= 0 || fd < 0 || !line)
+	if (d->rows <= 0 || fd < 0 || !line)
 		return (FAILURE);
-	m->cols = word_count(line);
-	if (create_matrix_elements(m) == FAILURE)
+	d->cols = word_count(line);
+	if (create_matrix_elements(d) == FAILURE)
 		return (free_ptr_return_int((void *)&line, FAILURE));
 	i = -1;
-	while (++i < m->rows)
+	while (++i < d->rows)
 	{
 		if (!line)
 		{
@@ -65,7 +66,41 @@ int	parse_map_file(const char *file_name, t_matrix *m)
 		free(line);
 		line = get_next_line(fd);
 	}
+	close(fd);
 	return (SUCCESS);
+}
+
+int	allocate_data(t_fdf_data *d)
+{
+	int	i;
+
+	d->map = ft_calloc(d->rows, sizeof(int *));
+	d->colors = ft_calloc(d->rows, sizeof(unsigned int *));
+	d->world = ft_calloc(d->rows, sizeof(t_dp3 *));
+	d->view = ft_calloc(d->rows, sizeof(t_dp2 *));
+	d->pixels = ft_calloc(d->rows, sizeof(t_ip2 *));
+	if (!d->map || !d->colors || !d->world || !d->view || !d->pixels)
+		return (FAILURE);
+	i = -1;
+	while (++i < d->rows)
+	{
+		d->map[i] = ft_calloc(d->cols, sizeof(int));
+		d->colors[i] = ft_calloc(d->cols, sizeof(unsigned int));
+		d->world[i] = ft_calloc(d->cols, sizeof(t_dp3));
+		d->view[i] = ft_calloc(d->cols, sizeof(t_dp2));
+		d->pixels[i] = ft_calloc(d->cols, sizeof(t_ip2));
+		if (!d->map[i] || !d->colors[i] || !d->world[i]
+			|| !d->view[i] || !d->pixels[i])
+		{
+			free_data(d);
+			return (FAILURE);
+		}
+	}
+}
+
+void	free_from_index(t_fdf_data *d, int i)
+{
+	int	i;
 }
 
 int	count_rows(const char *file_name)

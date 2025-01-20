@@ -53,7 +53,11 @@ SRC :=	ft_isalpha.c	ft_isdigit.c	ft_isalnum.c	ft_isascii.c	\
 	larger_int.c	smaller_int.c	\
 	first_int_larger.c	first_int_smaller.c	\
 	ft_iabs.c	\
-	valid_multinumberstring.c
+	valid_multinumberstring.c	\
+	ft_islower.c	ft_isupper.c	\
+	contains_duplicate_char.c	char_index.c	\
+	valid_hex_string.c	atou_base.c	atohex.c
+
 
 OBJ	:= $(SRC:.c=.o)
 
