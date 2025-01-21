@@ -77,10 +77,12 @@ typedef struct s_fdf_data
 	t_dp3			**world;
 	t_dp2			**view;
 	t_ip2			**pixels;
+	double			view_scale;
+	t_dp2			view_offset;
 }	t_fdf_data;
 
 void	free_data(t_fdf_data *data);
-void	free_print_exit(t_fdf_data *data, const char *error);
+void	free_close_print_exit(t_fdf_data *data, const char *error);
 
 void	print_map(t_fdf_data *data);
 void	print_colors(t_fdf_data *data);
@@ -88,7 +90,7 @@ void	print_colors(t_fdf_data *data);
 /*----------------------------------------------------------------------------*/
 /*                             map_handling.c                                 */
 /*----------------------------------------------------------------------------*/
-int		validate_map_file(const char *file_name);
+int		validate_map_file(const char *file_name, t_fdf_data *data);
 void	parse_map_file(const char *file_name, t_fdf_data *data);
 int		count_rows(const char *file_name);
 /*----------------------------------------------------------------------------*/

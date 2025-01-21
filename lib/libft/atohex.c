@@ -20,7 +20,7 @@ unsigned int	atohex(const char *str)
 
 	if (!valid_hex_string(str))
 		return (UINT_MAX);
-	str = skip_whitespace(str);
+	str = skip_whitespace(str) + 2;
 	prev = 0;
 	hex = 0;
 	while (*str && (ft_strchr(HEX_BASE_UPPER_CASE, *str)

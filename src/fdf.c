@@ -23,9 +23,9 @@ void		free_points(t_fdf_data *data);
 
 void		matrix_transform(t_dp3 *p, double **t);
 
-void		offset_point(t_dp3 *point, t_dp3 offset);
-void		rotate_point(t_dp3 *point, double rx, double ry, double rz);
-void		scale_point(t_dp3 *point, double multiplier);
+void		offset_dp3(t_dp3 *point, t_dp3 offset);
+void		scale_dp3(t_dp3 *point, double multiplier);
+void		rotate_dp3(t_dp3 *point, double rx, double ry, double rz);
 
 void		offset_world(t_fdf_data *data, t_dp3 offset);
 void		scale_world(t_fdf_data *data, double multiplier);
@@ -34,43 +34,53 @@ void		center_world(t_fdf_data *data);
 
 void		y_plane_projection(t_fdf_data *data);
 
-void		rotate_view(t_fdf_data *data, double rot);
+void		offset_dp2(t_dp2 *point, t_dp2 offset);
+void		rotate_dp2(t_dp2 *point, double rx, double ry, double rz);
+void		scale_dp2(t_dp2 *point, double multiplier);
+
+void		offset_view(t_fdf_data *data, t_dp2 offset);
 void		scale_view(t_fdf_data *data, double multiplier);
-void		offset_view(t_fdf_data *data, t_dp2 *offset);
-void		view_to_image(t_fdf_data *data, int win_width, int win_height);
+void		rotate_view(t_fdf_data *data, double rot);
+
+double		min_x_view(t_fdf_data *data);
+double		max_x_view(t_fdf_data *data);
+double		min_y_view(t_fdf_data *data);
+double		max_y_view(t_fdf_data *data);
+
+void		center_view(t_fdf_data *data);
+void		stretch_view_to_window_scale(t_fdf_data *data);
+void		initialize_pixels(t_fdf_data *data);
+void		assign_pixels(t_fdf_data *data);
 
 void		draw_map(t_fdf_data *data);
 
 void		free_data(t_fdf_data *data);
-void		free_print_exit(t_fdf_data *data, const char *error);
+void		free_close_print_exit(t_fdf_data *data, const char *error);
 
 int	main(int argc, char *argv[])
 {
 	t_fdf_data	data;
 
 	if (argc != 2)
-		return (write_error_return_int("Usage: ./fdf <file_name>", 1));
+		return (write_error_return_int("Usage: ./fdf <map_name>.fdf", 1));
 	ft_memset(&data, 0, sizeof(t_fdf_data));
-	if (validate_map_file(argv[1]) == FAILURE)
-		return (write_error_return_int("ERROR: invalid map file, "
-				"check the file name and/or formatting", 1));
+	if (validate_map_file(argv[1], &data) == FAILURE)
+		free_close_print_exit(&data, "ERROR: couldn't validate map file");
 	parse_map_file(argv[1], &data);
 	print_map(&data);
 	print_colors(&data);
 	assign_world(&data);
 	center_world(&data);
-	rotate_world(&data, M_PI / 6, M_PI / 6, M_PI / 6);
-	scale_world(&data, 0.5);
 	y_plane_projection(&data);
-	view_to_image(&data, WIDTH, HEIGHT);
+	initialize_pixels(&data);
 	data.mlx = mlx_init(WIDTH, HEIGHT, "fdf", 1);
 	if (!data.mlx)
-		free_print_exit(&data, "ERROR: couldn't initiate mlx");
+		free_close_print_exit(&data, "ERROR: couldn't initiate mlx");
 	data.img = mlx_new_image(data.mlx, WIDTH, HEIGHT);
 	if (!data.img)
-		free_print_exit(&data, "ERROR: couldn't create image");
+		free_close_print_exit(&data, "ERROR: couldn't create image");
 	if (mlx_image_to_window(data.mlx, data.img, 0, 0) < 0)
-		free_print_exit(&data, "ERROR: couldn't draw image");
+		free_close_print_exit(&data, "ERROR: couldn't insert image to window");
 	fill_with_color(data.img, BLACK);
 	draw_map(&data);
 	mlx_loop(data.mlx);
@@ -79,12 +89,14 @@ int	main(int argc, char *argv[])
 	return (0);
 }
 
-void	free_print_exit(t_fdf_data *data, const char *error)
+void	free_close_print_exit(t_fdf_data *data, const char *error)
 {
 	free_data(data);
 	ft_memset(data, 0, sizeof(t_fdf_data));
 	ft_putstr_fd(error, STDERR_FILENO);
 	ft_putstr_fd("\n", STDERR_FILENO);
+	if (data->fd > 0)
+		close(data->fd);
 	exit(EXIT_FAILURE);
 }
 
@@ -260,14 +272,14 @@ void	assign_world(t_fdf_data *data)
 	}
 }
 
-void	offset_point(t_dp3 *point, t_dp3 offset)
+void	offset_dp3(t_dp3 *point, t_dp3 offset)
 {
 	point->x += offset.x;
 	point->y += offset.y;
 	point->z += offset.z;
 }
 
-void	scale_point(t_dp3 *point, double multiplier)
+void	scale_dp3(t_dp3 *point, double multiplier)
 {
 	point->x *= multiplier;
 	point->y *= multiplier;
@@ -281,7 +293,7 @@ void	matrix_transform(t_dp3 *p, double **t)
 	p->z = t[2][0] * p->x + t[2][1] * p->y + t[2][2] * p->z;
 }
 
-void	rotate_point(t_dp3 *point, double rx, double ry, double rz)
+void	rotate_dp3(t_dp3 *point, double rx, double ry, double rz)
 {
 	double	**x_rot;
 	double	**y_rot;
@@ -315,7 +327,7 @@ void	rotate_world(t_fdf_data *data, double rx, double ry, double rz)
 	{
 		j = -1;
 		while (++j < data->cols)
-			rotate_point(&data->world[i][j], rx, ry, rz);
+			rotate_dp3(&data->world[i][j], rx, ry, rz);
 	}
 }
 
@@ -329,7 +341,7 @@ void	scale_world(t_fdf_data *data, double multiplier)
 	{
 		j = -1;
 		while (++j < data->cols)
-			scale_point(&data->world[i][j], multiplier);
+			scale_dp3(&data->world[i][j], multiplier);
 	}
 }
 
@@ -343,7 +355,7 @@ void	offset_world(t_fdf_data *data, t_dp3 offset)
 	{
 		j = -1;
 		while (++j < data->cols)
-			offset_point(&data->world[i][j], offset);
+			offset_dp3(&data->world[i][j], offset);
 	}
 }
 
@@ -359,7 +371,7 @@ void	center_world(t_fdf_data *data)
 	size_t	i;
 
 	offset = data->world[0][0];
-	scale_point(&offset, -1);
+	scale_dp3(&offset, -1);
 	offset_world(data, offset);
 	min_x = data->world[0][0].x;
 	max_x = data->world[0][0].x;
@@ -408,6 +420,47 @@ void	y_plane_projection(t_fdf_data *data)
 	}
 }
 
+void	offset_dp2(t_dp2 *point, t_dp2 offset)
+{
+	point->x += offset.x;
+	point->y += offset.y;
+}
+
+void	scale_dp2(t_dp2 *point, double multiplier)
+{
+	point->x *= multiplier;
+	point->y *= multiplier;
+}
+
+void	offset_view(t_fdf_data *data, t_dp2 offset)
+{
+	int		i;
+	int		j;
+
+	i = -1;
+	while (++i < data->rows)
+	{
+		j = -1;
+		while (++j < data->cols)
+			offset_dp2(&data->view[i][j], offset);
+	}
+}
+
+void	scale_view(t_fdf_data *data, double multiplier)
+{
+
+	int		i;
+	int		j;
+
+	i = -1;
+	while (++i < data->rows)
+	{
+		j = -1;
+		while (++j < data->cols)
+			scale_dp2(&data->view[i][j], multiplier);
+	}
+}
+
 void	rotate_view(t_fdf_data *data, double rot)
 {
 	int		i;
@@ -429,60 +482,121 @@ void	rotate_view(t_fdf_data *data, double rot)
 	}
 }
 
-void	scale_view(t_fdf_data *data, double multiplier)
+void	center_view_x(t_fdf_data *data)
 {
-
-	int		i;
-	int		j;
-
-	i = -1;
-	while (++i < data->rows)
-	{
-		j = -1;
-		while (++j < data->cols)
-		{
-			data->view[i][j].x *= multiplier;
-			data->view[i][j].y *= multiplier;
-		}
-	}
-}
-
-void	offset_view(t_fdf_data *data, t_dp2 *offset)
-{
-	int		i;
-	int		j;
-
-	i = -1;
-	while (++i < data->rows)
-	{
-		j = -1;
-		while (++j < data->cols)
-		{
-			data->view[i][j].x += offset->x;
-			data->view[i][j].y += offset->y;
-		}
-	}
-}
-
-void	view_to_image(t_fdf_data *data, int win_width, int win_height)
-{
-	int		offset_x;
-	int		offset_y;
-	t_dp2	offset;
-	int		i;
-	int		j;
-	double	max_x;
-	double	max_y;
 	double	min_x;
-	double	min_y;
-	double	width_x;
-	double	width_y;
-	double	multiplier_x;
-	double	multiplier_y;
+	double	max_x;
+	int		i;
+	int		j;
+	t_dp2	offset;
 
-	rotate_view(data, M_PI);
 	min_x = data->view[0][0].x;
 	max_x = data->view[0][0].x;
+	i = -1;
+	while (++i < data->rows)
+	{
+		j = -1;
+		while (++j < data->cols)
+		{
+			if (data->view[i][j].x < min_x)
+				min_x = data->view[i][j].x;
+			if (data->view[i][j].x > max_x)
+				max_x = data->view[i][j].x;
+		}
+	}
+	offset.x = -(max_x + min_x) / 2;
+	offset.y = 0;
+	offset_view(data, offset);
+}
+
+double	min_y_view(t_fdf_data *data)
+{
+	double	min_y;
+	int		i;
+	int		j;
+
+	min_y = data->view[0][0].y;
+	i = -1;
+	while (++i < data->rows)
+	{
+		j = -1;
+		while (++j < data->cols)
+		{
+			if (data->view[i][j].y < min_y)
+				min_y = data->view[i][j].y;
+		}
+	}
+	return (min_y);
+}
+
+double	max_y_view(t_fdf_data *data)
+{
+	double	max_y;
+	int		i;
+	int		j;
+
+	max_y = data->view[0][0].y;
+	i = -1;
+	while (++i < data->rows)
+	{
+		j = -1;
+		while (++j < data->cols)
+		{
+			if (data->view[i][j].y > max_y)
+				max_y = data->view[i][j].y;
+		}
+	}
+	return (max_y);
+}
+
+double	min_x_view(t_fdf_data *data)
+{
+	double	min_x;
+	int		i;
+	int		j;
+
+	min_x = data->view[0][0].x;
+	i = -1;
+	while (++i < data->rows)
+	{
+		j = -1;
+		while (++j < data->cols)
+		{
+			if (data->view[i][j].x < min_x)
+				min_x = data->view[i][j].x;
+		}
+	}
+	return (min_x);
+}
+
+double	max_x_view(t_fdf_data *data)
+{
+	double	max_x;
+	int		i;
+	int		j;
+
+	max_x = data->view[0][0].x;
+	i = -1;
+	while (++i < data->rows)
+	{
+		j = -1;
+		while (++j < data->cols)
+		{
+			if (data->view[i][j].x > max_x)
+				max_x = data->view[i][j].x;
+		}
+	}
+	return (max_x);
+}
+
+void	center_view_y(t_fdf_data *data)
+{
+	double	min_y;
+	double	max_y;
+	int		i;
+	int		j;
+	t_dp2	offset;
+
 	min_y = data->view[0][0].y;
 	max_y = data->view[0][0].y;
 	i = -1;
@@ -491,34 +605,72 @@ void	view_to_image(t_fdf_data *data, int win_width, int win_height)
 		j = -1;
 		while (++j < data->cols)
 		{
-			if (min_x > data->view[i][j].x)
-				min_x = data->view[i][j].x;
-			if (max_x < data->view[i][j].x)
-				max_x = data->view[i][j].x;
-			if (min_y > data->view[i][j].y)
+			if (data->view[i][j].y < min_y)
 				min_y = data->view[i][j].y;
-			if (max_y < data->view[i][j].y)
+			if (data->view[i][j].y > max_y)
 				max_y = data->view[i][j].y;
 		}
 	}
-	width_x = max_x - min_x;
-	width_y = max_y - min_y;
-	if (width_x == 0)
-		multiplier_x = 100;
+	offset.y = -(max_y + min_y) / 2;
+	offset.x = 0;
+	offset_view(data, offset);
+}
+
+void	center_view(t_fdf_data *data)
+{
+	center_view_x(data);
+	center_view_y(data);
+}
+
+
+void	initialize_pixels(t_fdf_data *data)
+{
+	t_dp2	offset;
+
+	rotate_view(data, M_PI);
+	center_view(data);
+	stretch_view_to_window_scale(data);
+	offset.x = (double)WIDTH / 2;
+	offset.y = (double)HEIGHT / 2;
+	data->view_offset = offset;
+	offset_view(data, data->view_offset);
+	assign_pixels(data);
+}
+
+void	stretch_view_to_window_scale(t_fdf_data *data)
+{
+	double	width_x;
+	double	width_y;
+	double	ratio_x;
+	double	ratio_y;
+
+	ratio_x = 1;
+	ratio_y = 1;
+	data->view_scale = 1;
+	width_x = max_x_view(data) - min_x_view(data);
+	width_y = max_y_view(data) - min_y_view(data);
+	if (width_y == 0 && width_x == 0)
+		return ;
+	if (width_x != 0)
+		ratio_x = WIDTH / width_x;
+	if (width_y != 0)
+		ratio_y = WIDTH / width_y;
+	if (ratio_x == 1)
+		data->view_scale = ratio_y;
+	if (ratio_y == 1)
+		data->view_scale = ratio_x;
+	if (ratio_y < ratio_x)
+		data->view_scale = ratio_y;
 	else
-		multiplier_x = WIDTH / width_x;
-	if (width_y == 0)
-		multiplier_y = 100;
-	else
-		multiplier_y = WIDTH / width_x;
-	if (multiplier_x < multiplier_y)
-		scale_view(data, multiplier_x);
-	else
-		scale_view(data, multiplier_y);
-	offset_x = win_width / 2;
-	offset_y = win_height / 2;
-	offset = (t_dp2){.x = offset_x, .y = offset_y};
-	offset_view(data, &offset);
+		data->view_scale = ratio_x;
+	scale_view(data, data->view_scale);
+}
+
+void	assign_pixels(t_fdf_data *data)
+{
+	int	i;
+	int	j;
+
 	i = -1;
 	while (++i < data->rows)
 	{
@@ -529,6 +681,7 @@ void	view_to_image(t_fdf_data *data, int win_width, int win_height)
 			data->pixels[i][j].y = (int)data->view[i][j].y;
 		}
 	}
+
 }
 
 void	draw_map(t_fdf_data *data)
