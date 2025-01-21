@@ -23,8 +23,8 @@ unsigned int	atohex(const char *str)
 	str = skip_whitespace(str);
 	prev = 0;
 	hex = 0;
-	while (ft_strchr(HEX_BASE_UPPER_CASE, *str)
-		|| ft_strchr(HEX_BASE_LOWER_CASE, *str))
+	while (*str && (ft_strchr(HEX_BASE_UPPER_CASE, *str)
+		|| ft_strchr(HEX_BASE_LOWER_CASE, *str)))
 	{
 		if (ft_islower(*str))
 			i = char_index(HEX_BASE_LOWER_CASE, *str);

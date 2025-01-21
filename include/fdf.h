@@ -79,19 +79,18 @@ typedef struct s_fdf_data
 	t_ip2			**pixels;
 }	t_fdf_data;
 
+void	free_data(t_fdf_data *data);
+void	free_print_exit(t_fdf_data *data, const char *error);
+
+void	print_map(t_fdf_data *data);
+void	print_colors(t_fdf_data *data);
+
 /*----------------------------------------------------------------------------*/
 /*                             map_handling.c                                 */
 /*----------------------------------------------------------------------------*/
 int		validate_map_file(const char *file_name);
-int		parse_map_file(const char *file_name, t_fdf_data *data);
+void	parse_map_file(const char *file_name, t_fdf_data *data);
 int		count_rows(const char *file_name);
-/*----------------------------------------------------------------------------*/
-/*                                matrix.c                                    */
-/*----------------------------------------------------------------------------*/
-int		create_matrix_elements(t_fdf_data *data);
-// void	fill_matrix_row(t_imatrix *m, int row, const char *line);
-// void	free_matrix_elements(t_imatrix *m);
-// void	print_matrix(const t_imatrix *m);
 /*----------------------------------------------------------------------------*/
 int	create_points(t_fdf_data *data);
 /*----------------------------------------------------------------------------*/

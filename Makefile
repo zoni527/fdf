@@ -16,14 +16,12 @@ CC		:= cc
 DEBUGFLAGS	:= -g
 CFLAGS		:= -Wall -Wextra -Werror
 RM		:= rm -f
-DEBUG		:=
 
 SRCDIR		:= ./src
 INCDIR		:= ./include
 
 SRC	:=	$(SRCDIR)/fdf.c \
-		$(SRCDIR)/map_handling.c \
-		$(SRCDIR)/matrix.c
+		$(SRCDIR)/map_handling.c
 
 OBJ		:= $(SRC:.c=.o)
 
@@ -39,7 +37,7 @@ FDFH		:= $(INCDIR)/fdf.h
 all: $(NAME)
 
 $(NAME): $(OBJ) $(LIBFT) $(LIBFTH) $(LIBMLX) $(FDFH)
-	$(CC) $(CFLAGS) $(OBJ) $(LIBFT) $(LIBMLX) $(LIBMLXFLAGS) $(INC) -o $@ $(DEBUG)
+	$(CC) $(CFLAGS) $(OBJ) $(LIBFT) $(LIBMLX) $(LIBMLXFLAGS) $(INC) -o $@
 
 $(LIBMLX):
 	cmake $(LIBMLXDIR) -B $(LIBMLXDIR)/build && make -C $(LIBMLXDIR)/build -j4

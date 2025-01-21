@@ -25,7 +25,7 @@ int	valid_hex_string(const char *str)
 	str += 2;
 	i = 0;
 	while (str[i] && (ft_strchr(HEX_BASE_UPPER_CASE, str[i])
-		|| ft_strchr(HEX_BASE_LOWER_CASE, str[i])))
+			|| ft_strchr(HEX_BASE_LOWER_CASE, str[i])))
 		i++;
 	str = skip_whitespace(&str[i]);
 	if (!*str)
