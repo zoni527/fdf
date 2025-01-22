@@ -37,11 +37,12 @@ typedef struct s_dp3
 	double	z;
 }	t_dp3;
 
-typedef struct s_ip2
+typedef struct s_pixel
 {
-	int	x;
-	int	y;
-}	t_ip2;
+	int				x;
+	int				y;
+	unsigned int	rgba;
+}	t_pixel;
 
 typedef struct s_dp2
 {
@@ -73,10 +74,9 @@ typedef struct s_fdf_data
 	int				rows;
 	int				cols;
 	int				**map;
-	unsigned int	**colors;
 	t_dp3			**world;
 	t_dp2			**view;
-	t_ip2			**pixels;
+	t_pixel			**pixels;
 	double			view_scale;
 	t_dp2			view_offset;
 }	t_fdf_data;

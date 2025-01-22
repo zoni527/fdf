@@ -54,7 +54,7 @@ clean:
 
 fclean: clean
 	make fclean -C $(LIBFTDIR)
-	rm $(LIBMLX)
+	$(RM) $(LIBMLX)
 	$(RM) $(NAME)
 
 re: fclean all

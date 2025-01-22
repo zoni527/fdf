@@ -12,11 +12,10 @@
 
 #include "../include/fdf.h"
 
-void		draw_segment(t_fdf_data *data, t_ip2 p1, t_ip2 p2,
-				   unsigned int rgba);
+void		draw_segment(t_fdf_data *data, t_pixel p1, t_pixel p2);
 void		fill_with_color(mlx_image_t *img, unsigned int rgba);
 void		draw_test_reticle(mlx_image_t *img, int rgba);
-t_linvars	calculate_linvars(t_ip2 p1, t_ip2 p2);
+t_linvars	calculate_linvars(t_pixel p1, t_pixel p2);
 
 void		assign_world(t_fdf_data *data);
 void		free_points(t_fdf_data *data);
@@ -33,6 +32,8 @@ void		rotate_world(t_fdf_data *data, double rx, double ry, double rz);
 void		center_world(t_fdf_data *data);
 
 void		y_plane_projection(t_fdf_data *data);
+void		x_plane_projection(t_fdf_data *data);
+void		z_plane_projection(t_fdf_data *data);
 
 void		offset_dp2(t_dp2 *point, t_dp2 offset);
 void		rotate_dp2(t_dp2 *point, double rx, double ry, double rz);
@@ -57,6 +58,8 @@ void		draw_map(t_fdf_data *data);
 void		free_data(t_fdf_data *data);
 void		free_close_print_exit(t_fdf_data *data, const char *error);
 
+void		set_up_scene(t_fdf_data *data);
+
 int	main(int argc, char *argv[])
 {
 	t_fdf_data	data;
@@ -67,20 +70,7 @@ int	main(int argc, char *argv[])
 	if (validate_map_file(argv[1], &data) == FAILURE)
 		free_close_print_exit(&data, "ERROR: couldn't validate map file");
 	parse_map_file(argv[1], &data);
-	print_map(&data);
-	print_colors(&data);
-	assign_world(&data);
-	center_world(&data);
-	y_plane_projection(&data);
-	initialize_pixels(&data);
-	data.mlx = mlx_init(WIDTH, HEIGHT, "fdf", 1);
-	if (!data.mlx)
-		free_close_print_exit(&data, "ERROR: couldn't initiate mlx");
-	data.img = mlx_new_image(data.mlx, WIDTH, HEIGHT);
-	if (!data.img)
-		free_close_print_exit(&data, "ERROR: couldn't create image");
-	if (mlx_image_to_window(data.mlx, data.img, 0, 0) < 0)
-		free_close_print_exit(&data, "ERROR: couldn't insert image to window");
+	set_up_scene(&data);
 	fill_with_color(data.img, BLACK);
 	draw_map(&data);
 	mlx_loop(data.mlx);
@@ -89,14 +79,33 @@ int	main(int argc, char *argv[])
 	return (0);
 }
 
+void	set_up_scene(t_fdf_data *data)
+{
+	print_map(data);
+	print_colors(data);
+	assign_world(data);
+	center_world(data);
+	y_plane_projection(data);
+	initialize_pixels(data);
+	data->mlx = mlx_init(WIDTH, HEIGHT, "fdf", 1);
+	if (!data->mlx)
+		free_close_print_exit(data, "ERROR: couldn't initiate mlx");
+	data->img = mlx_new_image(data->mlx, WIDTH, HEIGHT);
+	if (!data->img)
+		free_close_print_exit(data, "ERROR: couldn't create image");
+	if (mlx_image_to_window(data->mlx, data->img, 0, 0) < 0)
+		free_close_print_exit(data, "ERROR: couldn't insert image to window");
+}
+
 void	free_close_print_exit(t_fdf_data *data, const char *error)
 {
 	free_data(data);
-	ft_memset(data, 0, sizeof(t_fdf_data));
-	ft_putstr_fd(error, STDERR_FILENO);
-	ft_putstr_fd("\n", STDERR_FILENO);
 	if (data->fd > 0)
 		close(data->fd);
+	if (data->mlx)
+		mlx_terminate(data->mlx);
+	ft_putstr_fd(error, STDERR_FILENO);
+	ft_putstr_fd("\n", STDERR_FILENO);
 	exit(EXIT_FAILURE);
 }
 
@@ -109,8 +118,6 @@ void	free_data(t_fdf_data *data)
 	{
 		if (data->map)
 			free(data->map[i]);
-		if (data->colors)
-			free(data->colors[i]);
 		if (data->world)
 			free(data->world[i]);
 		if (data->view)
@@ -119,26 +126,49 @@ void	free_data(t_fdf_data *data)
 			free(data->pixels[i]);
 	}
 	free(data->map);
-	free(data->colors);
 	free(data->world);
 	free(data->view);
 	free(data->pixels);
 }
 
-void	draw_segment(t_fdf_data *data, t_ip2 p1, t_ip2 p2,
-				  unsigned int rgba)
+void	draw_segment(t_fdf_data *data, t_pixel p1, t_pixel p2)
 {
-	t_linvars	l;
-	int			i;
-	int			x;
-	int			y;
+	t_linvars		l;
+	int				i;
+	int				x;
+	int				y;
+	int				r1;
+	int				r2;
+	int				r;
+	int				g1;
+	int				g2;
+	int				g;
+	int				b1;
+	int				b2;
+	int				b;
+	unsigned int	rgba;
 
+	r1 = p1.rgba >> 24 & 0xff;
+	r2 = p2.rgba >> 24 & 0xff;
+	g1 = p1.rgba >> 16 & 0xff;
+	g2 = p2.rgba >> 16 & 0xff;
+	b1 = p1.rgba >> 8 & 0xff;
+	b2 = p2.rgba >> 8 & 0xff;
 	l = calculate_linvars(p1, p2);
 	i = -1;
 	if (l.delta_x == 0)
 	{
 		while (++i < abs(l.delta_y) + 1)
-			mlx_put_pixel(data->img, p1.x, (int)(p1.y + i * l.step_y), rgba);
+		{
+			x = p1.x;
+			y = (int)(p1.y + i * l.step_y);
+			r = (int)(r1 + i * (double)(r2 - r1) / abs(l.delta_y));
+			g = (int)(g1 + i * (double)(g2 - g1) / abs(l.delta_y));
+			b = (int)(b1 + i * (double)(b2 - b1) / abs(l.delta_y));
+			rgba = (r << 24 | g << 16 | b << 8 | 0xff);
+			if (x >= 0 && x < (int)data->img->width && y >= 0 && y < (int)data->img->height)
+				mlx_put_pixel(data->img, p1.x, (int)(p1.y + i * l.step_y), rgba);
+		}
 		return ;
 	}
 	if (l.slope <= 1)
@@ -147,6 +177,10 @@ void	draw_segment(t_fdf_data *data, t_ip2 p1, t_ip2 p2,
 		{
 			x = p1.x + i * l.step_x;
 			y = (int)(p1.y + i * l.step_y * l.slope);
+			r = (int)(r1 + i * (double)(r2 - r1) / abs(l.delta_x));
+			g = (int)(g1 + i * (double)(g2 - g1) / abs(l.delta_x));
+			b = (int)(b1 + i * (double)(b2 - b1) / abs(l.delta_x));
+			rgba = (r << 24 | g << 16 | b << 8 | 0xff);
 			if (x >= 0 && x < (int)data->img->width && y >= 0 && y < (int)data->img->height)
 				mlx_put_pixel(data->img, x, y, rgba);
 		}
@@ -157,13 +191,43 @@ void	draw_segment(t_fdf_data *data, t_ip2 p1, t_ip2 p2,
 		{
 			y = p1.y + i * l.step_y;
 			x = (int)(p1.x + i * l.step_x * 1 / l.slope);
+			r = (int)(r1 + i * (double)(r2 - r1) / abs(l.delta_y));
+			g = (int)(g1 + i * (double)(g2 - g1) / abs(l.delta_y));
+			b = (int)(b1 + i * (double)(b2 - b1) / abs(l.delta_y));
+			rgba = (r << 24 | g << 16 | b << 8 | 0xff);
 			if (x >= 0 && x < (int)data->img->width && y >= 0 && y < (int)data->img->height)
 				mlx_put_pixel(data->img, x, y, rgba);
 		}
 	}
 }
 
-t_linvars	calculate_linvars(t_ip2 p1, t_ip2 p2)
+void	draw_vertical_segment(t_pixel p1, t_pixel p2, t_linvars *l)
+{
+	int	x;
+	int	y;
+	int	rgba;
+	int	i;
+
+	i = -1;
+	while (++i < abs(l->delta_y) + 1)
+	{
+		x = p1.x;
+		y = (int)(p1.y + i * l.step_y);
+		r = (int)(r1 + i * (double)(r2 - r1) / abs(l->delta_y));
+		g = (int)(g1 + i * (double)(g2 - g1) / abs(l->delta_y));
+		b = (int)(b1 + i * (double)(b2 - b1) / abs(l->delta_y));
+		rgba = (r << 24 | g << 16 | b << 8 | 0xff);
+		if (x >= 0 && x < (int)data->img->width && y >= 0 && y < (int)data->img->height)
+			mlx_put_pixel(data->img, p1.x, (int)(p1.y + i * l->step_y), rgba);
+	}
+}
+
+int	interpolate_color_channel(int p1_c, int p2_c, double distance, int index)
+{
+	return ((int)(p1_c + index * (double)(p2_c - p1_c) / distance));
+}
+
+t_linvars	calculate_linvars(t_pixel p1, t_pixel p2)
 {
 	t_linvars	l;
 
@@ -181,59 +245,59 @@ t_linvars	calculate_linvars(t_ip2 p1, t_ip2 p2)
 /*
 void	draw_test_reticle(mlx_image_t *img, int rgba)
 {
-	t_ip2	p1;
-	t_ip2	p2;
+	t_pixel	p1;
+	t_pixel	p2;
 
-	p1 = (t_ip2){.x = 0, .y = 0};
-	p2 = (t_ip2){.x = 0, .y = 0};
+	p1 = (t_pixel){.x = 0, .y = 0};
+	p2 = (t_pixel){.x = 0, .y = 0};
 	draw_segment(img, p1, p2, rgba);
-	p1 = (t_ip2){.x = WIDTH - 1, .y = HEIGHT - 1};
-	p2 = (t_ip2){.x = 0, .y = 0};
+	p1 = (t_pixel){.x = WIDTH - 1, .y = HEIGHT - 1};
+	p2 = (t_pixel){.x = 0, .y = 0};
 	draw_segment(img, p1, p2, rgba);
-	p1 = (t_ip2){.x = 0, .y = 0};
-	p2 = (t_ip2){.x = WIDTH - 1, .y = HEIGHT - 1};
+	p1 = (t_pixel){.x = 0, .y = 0};
+	p2 = (t_pixel){.x = WIDTH - 1, .y = HEIGHT - 1};
 	draw_segment(img, p1, p2, rgba);
-	p1 = (t_ip2){.x = 0, .y = HEIGHT - 1};
-	p2 = (t_ip2){.x = WIDTH - 1, .y = 0};
+	p1 = (t_pixel){.x = 0, .y = HEIGHT - 1};
+	p2 = (t_pixel){.x = WIDTH - 1, .y = 0};
 	draw_segment(img, p1, p2, rgba);
-	p1 = (t_ip2){.x = WIDTH - 1, .y = 0};
-	p2 = (t_ip2){.x = 0, .y = HEIGHT - 1};
+	p1 = (t_pixel){.x = WIDTH - 1, .y = 0};
+	p2 = (t_pixel){.x = 0, .y = HEIGHT - 1};
 	draw_segment(img, p1, p2, rgba);
-	p1 = (t_ip2){.x = WIDTH / 2, .y = 0};
-	p2 = (t_ip2){.x = WIDTH / 2, .y = HEIGHT - 1};
+	p1 = (t_pixel){.x = WIDTH / 2, .y = 0};
+	p2 = (t_pixel){.x = WIDTH / 2, .y = HEIGHT - 1};
 	draw_segment(img, p1, p2, rgba);
-	p1 = (t_ip2){.x = WIDTH / 2, .y = HEIGHT - 1};
-	p2 = (t_ip2){.x = WIDTH / 2, .y = 0};
+	p1 = (t_pixel){.x = WIDTH / 2, .y = HEIGHT - 1};
+	p2 = (t_pixel){.x = WIDTH / 2, .y = 0};
 	draw_segment(img, p1, p2, rgba);
-	p1 = (t_ip2){.x = 0, .y = HEIGHT / 2};
-	p2 = (t_ip2){.x = WIDTH - 1, .y = HEIGHT / 2};
+	p1 = (t_pixel){.x = 0, .y = HEIGHT / 2};
+	p2 = (t_pixel){.x = WIDTH - 1, .y = HEIGHT / 2};
 	draw_segment(img, p1, p2, rgba);
-	p1 = (t_ip2){.x = WIDTH - 1, .y = HEIGHT / 2};
-	p2 = (t_ip2){.x = 0, .y = HEIGHT / 2};
+	p1 = (t_pixel){.x = WIDTH - 1, .y = HEIGHT / 2};
+	p2 = (t_pixel){.x = 0, .y = HEIGHT / 2};
 	draw_segment(img, p1, p2, rgba);
-	p1 = (t_ip2){.x = WIDTH / 2, .y = 0};
-	p2 = (t_ip2){.x = 0, .y = HEIGHT / 2};
+	p1 = (t_pixel){.x = WIDTH / 2, .y = 0};
+	p2 = (t_pixel){.x = 0, .y = HEIGHT / 2};
 	draw_segment(img, p1, p2, rgba);
-	p1 = (t_ip2){.x = 0, .y = HEIGHT / 2};
-	p2 = (t_ip2){.x = WIDTH / 2, .y = 0};
+	p1 = (t_pixel){.x = 0, .y = HEIGHT / 2};
+	p2 = (t_pixel){.x = WIDTH / 2, .y = 0};
 	draw_segment(img, p1, p2, rgba);
-	p1 = (t_ip2){.x = WIDTH - 1, .y = HEIGHT / 2};
-	p2 = (t_ip2){.x = WIDTH / 2, .y = 0};
+	p1 = (t_pixel){.x = WIDTH - 1, .y = HEIGHT / 2};
+	p2 = (t_pixel){.x = WIDTH / 2, .y = 0};
 	draw_segment(img, p1, p2, rgba);
-	p1 = (t_ip2){.x = WIDTH / 2, .y = 0};
-	p2 = (t_ip2){.x = WIDTH - 1, .y = HEIGHT / 2};
+	p1 = (t_pixel){.x = WIDTH / 2, .y = 0};
+	p2 = (t_pixel){.x = WIDTH - 1, .y = HEIGHT / 2};
 	draw_segment(img, p1, p2, rgba);
-	p1 = (t_ip2){.x = WIDTH / 2, .y = HEIGHT - 1};
-	p2 = (t_ip2){.x = 0, .y = HEIGHT / 2};
+	p1 = (t_pixel){.x = WIDTH / 2, .y = HEIGHT - 1};
+	p2 = (t_pixel){.x = 0, .y = HEIGHT / 2};
 	draw_segment(img, p1, p2, rgba);
-	p1 = (t_ip2){.x = 0, .y = HEIGHT / 2};
-	p2 = (t_ip2){.x = WIDTH / 2, .y = HEIGHT - 1};
+	p1 = (t_pixel){.x = 0, .y = HEIGHT / 2};
+	p2 = (t_pixel){.x = WIDTH / 2, .y = HEIGHT - 1};
 	draw_segment(img, p1, p2, rgba);
-	p1 = (t_ip2){.x = WIDTH / 2, .y = HEIGHT - 1};
-	p2 = (t_ip2){.x = WIDTH - 1, .y = HEIGHT / 2};
+	p1 = (t_pixel){.x = WIDTH / 2, .y = HEIGHT - 1};
+	p2 = (t_pixel){.x = WIDTH - 1, .y = HEIGHT / 2};
 	draw_segment(img, p1, p2, rgba);
-	p1 = (t_ip2){.x = WIDTH - 1, .y = HEIGHT / 2};
-	p2 = (t_ip2){.x = WIDTH / 2, .y = HEIGHT - 1};
+	p1 = (t_pixel){.x = WIDTH - 1, .y = HEIGHT / 2};
+	p2 = (t_pixel){.x = WIDTH / 2, .y = HEIGHT - 1};
 	draw_segment(img, p1, p2, rgba);
 }
 */
@@ -416,6 +480,40 @@ void	y_plane_projection(t_fdf_data *data)
 		{
 			data->view[i][j].x = data->world[i][j].x;
 			data->view[i][j].y = data->world[i][j].z;
+		}
+	}
+}
+
+void	x_plane_projection(t_fdf_data *data)
+{
+	int	i;
+	int	j;
+
+	i = -1;
+	while (++i < data->rows)
+	{
+		j = -1;
+		while (++j < data->cols)
+		{
+			data->view[i][j].x = data->world[i][j].y;
+			data->view[i][j].y = data->world[i][j].z;
+		}
+	}
+}
+
+void	z_plane_projection(t_fdf_data *data)
+{
+	int	i;
+	int	j;
+
+	i = -1;
+	while (++i < data->rows)
+	{
+		j = -1;
+		while (++j < data->cols)
+		{
+			data->view[i][j].x = data->world[i][j].x;
+			data->view[i][j].y = data->world[i][j].y;
 		}
 	}
 }
@@ -695,18 +793,18 @@ void	draw_map(t_fdf_data *data)
 		j = -1;
 		while (++j < data->cols - 1)
 		{
-			draw_segment(data, data->pixels[i][j], data->pixels[i + 1][j], WHITE);
-			draw_segment(data, data->pixels[i][j], data->pixels[i][j + 1], WHITE);
+			draw_segment(data, data->pixels[i][j], data->pixels[i + 1][j]);
+			draw_segment(data, data->pixels[i][j], data->pixels[i][j + 1]);
 		}
 	}
 	j = data->cols -1;
 	i = -1;
 	while (++i < data->rows - 1)
-		draw_segment(data, data->pixels[i][j], data->pixels[i + 1][j], WHITE);
+		draw_segment(data, data->pixels[i][j], data->pixels[i + 1][j]);
 	i = data->rows - 1;
 	j = -1;
 	while (++j < data->cols - 1)
-		draw_segment(data, data->pixels[i][j], data->pixels[i][j + 1], WHITE);
+		draw_segment(data, data->pixels[i][j], data->pixels[i][j + 1]);
 }
 
 void	print_map(t_fdf_data *data)
@@ -737,7 +835,7 @@ void	print_colors(t_fdf_data *data)
 		j = -1;
 		while (++j < data->cols)
 		{
-			ft_printf("%x ", data->colors[i][j]);
+			ft_printf("0x%x ", data->pixels[i][j].rgba);
 		}
 		ft_printf("\n");
 	}
