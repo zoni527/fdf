@@ -21,7 +21,21 @@ SRCDIR		:= ./src
 INCDIR		:= ./include
 
 SRC	:=	$(SRCDIR)/fdf.c \
-		$(SRCDIR)/map_handling.c
+		$(SRCDIR)/map_handling.c \
+		$(SRCDIR)/world_manipulation.c \
+		$(SRCDIR)/world_centering.c \
+		$(SRCDIR)/world_max.c \
+		$(SRCDIR)/world_min.c \
+		$(SRCDIR)/view_manipulation.c \
+		$(SRCDIR)/view_centering.c \
+		$(SRCDIR)/view_min_max.c \
+		$(SRCDIR)/view_projections.c \
+		$(SRCDIR)/2d_point_manipulation.c \
+		$(SRCDIR)/3d_point_manipulation.c \
+		$(SRCDIR)/background_and_map_drawing.c \
+		$(SRCDIR)/input.c \
+		$(SRCDIR)/line_segment_drawing.c \
+		$(SRCDIR)/pixels_and_colors.c \
 
 OBJ		:= $(SRC:.c=.o)
 
@@ -50,6 +64,7 @@ $(LIBFT):
 
 clean:
 	make clean -C $(LIBFTDIR)
+	make clean -C $(LIBMLXDIR)/build
 	$(RM) $(OBJ)
 
 fclean: clean

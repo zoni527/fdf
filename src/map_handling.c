@@ -12,12 +12,11 @@
 
 #include "../include/fdf.h"
 
-void	allocate_data(t_fdf_data *d);
-void	assign_map_and_set_pixel_colors(t_fdf_data *data);
-void	assign_row(t_fdf_data *data, int row, char **words);
-int		count_rows_and_columns(t_fdf_data *data, char *line);
+static void	assign_map_and_set_pixel_colors(t_fdf *data);
+static void	assign_row(t_fdf *data, int row, char **words);
+static int	count_rows_and_columns(t_fdf *data, char *line);
 
-int	validate_map_file(const char *file_name, t_fdf_data *data)
+int	validate_map_file(const char *file_name, t_fdf *data)
 {
 	char	*line;
 
@@ -32,7 +31,17 @@ int	validate_map_file(const char *file_name, t_fdf_data *data)
 	return (SUCCESS);
 }
 
-int	count_rows_and_columns(t_fdf_data *data, char *line)
+void	parse_map_file(const char *file_name, t_fdf *data)
+{
+	data->fd = open(file_name, O_RDONLY);
+	if (data->fd < 0)
+		free_close_print_exit(data, "ERROR: couldn't open file");
+	assign_map_and_set_pixel_colors(data);
+	close(data->fd);
+	data->fd = -1;
+}
+
+static int	count_rows_and_columns(t_fdf *data, char *line)
 {
 	int	wc_o;
 	int	wc;
@@ -59,18 +68,7 @@ int	count_rows_and_columns(t_fdf_data *data, char *line)
 	return (SUCCESS);
 }
 
-void	parse_map_file(const char *file_name, t_fdf_data *data)
-{
-	data->fd = open(file_name, O_RDONLY);
-	if (data->fd < 0)
-		free_close_print_exit(data, "ERROR: couldn't open file");
-	allocate_data(data);
-	assign_map_and_set_pixel_colors(data);
-	close(data->fd);
-	data->fd = -1;
-}
-
-void	assign_map_and_set_pixel_colors(t_fdf_data *data)
+static void	assign_map_and_set_pixel_colors(t_fdf *data)
 {
 	char	*line;
 	char	**words;
@@ -96,7 +94,7 @@ void	assign_map_and_set_pixel_colors(t_fdf_data *data)
 	}
 }
 
-void	assign_row(t_fdf_data *data, int row, char **words)
+static void	assign_row(t_fdf *data, int row, char **words)
 {
 	int				j;
 	unsigned int	rgba;
@@ -110,27 +108,5 @@ void	assign_row(t_fdf_data *data, int row, char **words)
 		else
 			rgba = WHITE;
 		data->pixels[row][j].rgba = rgba;
-	}
-}
-
-void	allocate_data(t_fdf_data *d)
-{
-	int	i;
-
-	d->map = ft_calloc(d->rows, sizeof(int *));
-	d->world = ft_calloc(d->rows, sizeof(t_dp3 *));
-	d->view = ft_calloc(d->rows, sizeof(t_dp2 *));
-	d->pixels = ft_calloc(d->rows, sizeof(t_pixel *));
-	if (!d->map || !d->world || !d->view || !d->pixels)
-		free_close_print_exit(d, "ERROR: couldn't allocate data");
-	i = -1;
-	while (++i < d->rows)
-	{;
-		d->map[i] = ft_calloc(d->cols, sizeof(int));
-		d->world[i] = ft_calloc(d->cols, sizeof(t_dp3));
-		d->view[i] = ft_calloc(d->cols, sizeof(t_dp2));
-		d->pixels[i] = ft_calloc(d->cols, sizeof(t_pixel));
-		if (!d->map[i] || !d->world[i] || !d->view[i] || !d->pixels[i])
-			free_close_print_exit(d, "ERROR: couldn't allocate data");
 	}
 }

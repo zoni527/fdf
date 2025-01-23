@@ -1,0 +1,322 @@
+[
+ {
+  "directory": "/home/jvarila/Repos/fdf",
+  "arguments": [
+   "cc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-c",
+   "src/fdf.c",
+   "-o",
+   "src/fdf.o",
+   "-I",
+   "./lib/libft",
+   "-I",
+   "./include",
+   "-I",
+   "./lib/MLX42/include"
+  ],
+  "file": "src/fdf.c"
+ },
+ {
+  "directory": "/home/jvarila/Repos/fdf",
+  "arguments": [
+   "cc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-c",
+   "src/map_handling.c",
+   "-o",
+   "src/map_handling.o",
+   "-I",
+   "./lib/libft",
+   "-I",
+   "./include",
+   "-I",
+   "./lib/MLX42/include"
+  ],
+  "file": "src/map_handling.c"
+ },
+ {
+  "directory": "/home/jvarila/Repos/fdf",
+  "arguments": [
+   "cc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-c",
+   "src/world_manipulation.c",
+   "-o",
+   "src/world_manipulation.o",
+   "-I",
+   "./lib/libft",
+   "-I",
+   "./include",
+   "-I",
+   "./lib/MLX42/include"
+  ],
+  "file": "src/world_manipulation.c"
+ },
+ {
+  "directory": "/home/jvarila/Repos/fdf",
+  "arguments": [
+   "cc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-c",
+   "src/world_centering.c",
+   "-o",
+   "src/world_centering.o",
+   "-I",
+   "./lib/libft",
+   "-I",
+   "./include",
+   "-I",
+   "./lib/MLX42/include"
+  ],
+  "file": "src/world_centering.c"
+ },
+ {
+  "directory": "/home/jvarila/Repos/fdf",
+  "arguments": [
+   "cc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-c",
+   "src/world_max.c",
+   "-o",
+   "src/world_max.o",
+   "-I",
+   "./lib/libft",
+   "-I",
+   "./include",
+   "-I",
+   "./lib/MLX42/include"
+  ],
+  "file": "src/world_max.c"
+ },
+ {
+  "directory": "/home/jvarila/Repos/fdf",
+  "arguments": [
+   "cc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-c",
+   "src/world_min.c",
+   "-o",
+   "src/world_min.o",
+   "-I",
+   "./lib/libft",
+   "-I",
+   "./include",
+   "-I",
+   "./lib/MLX42/include"
+  ],
+  "file": "src/world_min.c"
+ },
+ {
+  "directory": "/home/jvarila/Repos/fdf",
+  "arguments": [
+   "cc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-c",
+   "src/view_manipulation.c",
+   "-o",
+   "src/view_manipulation.o",
+   "-I",
+   "./lib/libft",
+   "-I",
+   "./include",
+   "-I",
+   "./lib/MLX42/include"
+  ],
+  "file": "src/view_manipulation.c"
+ },
+ {
+  "directory": "/home/jvarila/Repos/fdf",
+  "arguments": [
+   "cc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-c",
+   "src/view_centering.c",
+   "-o",
+   "src/view_centering.o",
+   "-I",
+   "./lib/libft",
+   "-I",
+   "./include",
+   "-I",
+   "./lib/MLX42/include"
+  ],
+  "file": "src/view_centering.c"
+ },
+ {
+  "directory": "/home/jvarila/Repos/fdf",
+  "arguments": [
+   "cc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-c",
+   "src/view_min_max.c",
+   "-o",
+   "src/view_min_max.o",
+   "-I",
+   "./lib/libft",
+   "-I",
+   "./include",
+   "-I",
+   "./lib/MLX42/include"
+  ],
+  "file": "src/view_min_max.c"
+ },
+ {
+  "directory": "/home/jvarila/Repos/fdf",
+  "arguments": [
+   "cc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-c",
+   "src/view_projections.c",
+   "-o",
+   "src/view_projections.o",
+   "-I",
+   "./lib/libft",
+   "-I",
+   "./include",
+   "-I",
+   "./lib/MLX42/include"
+  ],
+  "file": "src/view_projections.c"
+ },
+ {
+  "directory": "/home/jvarila/Repos/fdf",
+  "arguments": [
+   "cc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-c",
+   "src/2d_point_manipulation.c",
+   "-o",
+   "src/2d_point_manipulation.o",
+   "-I",
+   "./lib/libft",
+   "-I",
+   "./include",
+   "-I",
+   "./lib/MLX42/include"
+  ],
+  "file": "src/2d_point_manipulation.c"
+ },
+ {
+  "directory": "/home/jvarila/Repos/fdf",
+  "arguments": [
+   "cc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-c",
+   "src/3d_point_manipulation.c",
+   "-o",
+   "src/3d_point_manipulation.o",
+   "-I",
+   "./lib/libft",
+   "-I",
+   "./include",
+   "-I",
+   "./lib/MLX42/include"
+  ],
+  "file": "src/3d_point_manipulation.c"
+ },
+ {
+  "directory": "/home/jvarila/Repos/fdf",
+  "arguments": [
+   "cc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-c",
+   "src/background_and_map_drawing.c",
+   "-o",
+   "src/background_and_map_drawing.o",
+   "-I",
+   "./lib/libft",
+   "-I",
+   "./include",
+   "-I",
+   "./lib/MLX42/include"
+  ],
+  "file": "src/background_and_map_drawing.c"
+ },
+ {
+  "directory": "/home/jvarila/Repos/fdf",
+  "arguments": [
+   "cc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-c",
+   "src/input.c",
+   "-o",
+   "src/input.o",
+   "-I",
+   "./lib/libft",
+   "-I",
+   "./include",
+   "-I",
+   "./lib/MLX42/include"
+  ],
+  "file": "src/input.c"
+ },
+ {
+  "directory": "/home/jvarila/Repos/fdf",
+  "arguments": [
+   "cc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-c",
+   "src/line_segment_drawing.c",
+   "-o",
+   "src/line_segment_drawing.o",
+   "-I",
+   "./lib/libft",
+   "-I",
+   "./include",
+   "-I",
+   "./lib/MLX42/include"
+  ],
+  "file": "src/line_segment_drawing.c"
+ },
+ {
+  "directory": "/home/jvarila/Repos/fdf",
+  "arguments": [
+   "cc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-c",
+   "src/pixels_and_colors.c",
+   "-o",
+   "src/pixels_and_colors.o",
+   "-I",
+   "./lib/libft",
+   "-I",
+   "./include",
+   "-I",
+   "./lib/MLX42/include"
+  ],
+  "file": "src/pixels_and_colors.c"
+ }
+]
