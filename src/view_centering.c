@@ -42,6 +42,7 @@ void	center_view_x(t_fdf *data)
 	}
 	offset.x = -(max_x + min_x) / 2;
 	offset.y = 0;
+	data->view_offset.x = offset.x;
 	offset_view(data, offset);
 }
 
@@ -69,5 +70,6 @@ void	center_view_y(t_fdf *data)
 	}
 	offset.y = -(max_y + min_y) / 2;
 	offset.x = 0;
+	data->view_offset.y = offset.y;
 	offset_view(data, offset);
 }

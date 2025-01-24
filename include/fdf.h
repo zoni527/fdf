@@ -21,14 +21,19 @@
 # define WIDTH	2048
 # define HEIGHT	2048
 
-# define RED	0xFF0000FF
-# define GREEN	0x00FF00FF
-# define BLUE	0x0000FFFF
-# define WHITE	0xFFFFFFFF
-# define BLACK	0x000000FF
+# define RED	0xff0000ff
+# define GREEN	0x00ff00ff
+# define BLUE	0x0000ffff
+# define WHITE	0xffffffff
+# define BLACK	0x000000ff
+
+# define LINE_GRADIENT_COLOR_1	0xffffffff
+# define LINE_GRADIENT_COLOR_2	0x0000ffff
 
 # define SUCCESS	0
 # define FAILURE	-1
+
+# define ONE_DEGREE	0.01745329252
 
 typedef struct s_dp3
 {
@@ -174,5 +179,6 @@ void		draw_segment(t_fdf *data, t_pixel p1, t_pixel p2);
 /*                                input.c                                     */
 /*----------------------------------------------------------------------------*/
 void		hook(void *param);
+void		scroll_hook(double xdelta, double ydelta, void *param);
 /*----------------------------------------------------------------------------*/
 #endif

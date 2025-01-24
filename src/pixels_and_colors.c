@@ -16,15 +16,16 @@ void	initialize_pixels(t_fdf *data)
 {
 	t_dp2	offset;
 
-	rotate_view(data, M_PI);
-	center_view(data);
 	stretch_view_to_window_scale(data);
 	scale_view(data, 0.9);
 	data->view_scale *= 0.9;
+	rotate_view(data, M_PI);
+	center_view(data);
 	offset.x = (double)WIDTH / 2;
 	offset.y = (double)HEIGHT / 2;
-	data->view_offset = offset;
-	offset_view(data, data->view_offset);
+	data->view_offset.x += offset.x;
+	data->view_offset.y += offset.y;
+	offset_view(data, offset);
 	view_to_pixels(data);
 }
 

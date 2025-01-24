@@ -12,6 +12,8 @@
 
 #include "../include/fdf.h"
 
+void	set_default_gradient(t_fdf *data);
+
 int	main(int argc, char *argv[])
 {
 	t_fdf	data;
@@ -26,6 +28,7 @@ int	main(int argc, char *argv[])
 	set_up_scene(&data);
 	draw_map(&data);
 	mlx_loop_hook(data.mlx, &hook, &data);
+	mlx_scroll_hook(data.mlx, &scroll_hook, &data);
 	mlx_loop(data.mlx);
 	mlx_terminate(data.mlx);
 	free_data(&data);
@@ -38,9 +41,10 @@ void	set_up_scene(t_fdf *data)
 	print_colors(data);
 	assign_world(data);
 	center_world(data);
-	rotate_world(data, 0 * M_PI / 12, 0 * M_PI / 12, 12 * M_PI / 12);
-	rotate_world(data, 0 * M_PI / 12, 0 * M_PI / 12, 3 * M_PI / 12);
-	rotate_world(data, atan(1 / sqrt(2)), 0 * M_PI / 12, 0 * M_PI / 12);
+	set_default_gradient(data);
+	rotate_world(data, 0, 0, 180 * ONE_DEGREE);
+	rotate_world(data, 0, 0, 45 * ONE_DEGREE);
+	rotate_world(data, atan(1 / sqrt(2)), 0, 0);
 	y_plane_projection(data);
 	initialize_pixels(data);
 	data->mlx = mlx_init(WIDTH, HEIGHT, "fdf", 1);
@@ -109,4 +113,33 @@ void	free_data(t_fdf *data)
 	free(data->world);
 	free(data->view);
 	free(data->pixels);
+}
+
+void	set_default_gradient(t_fdf *data)
+{
+	double	min_z;
+	double	max_z;
+	unsigned int	color_1;
+	unsigned int	color_2;
+	double	a;
+	double	b;
+	double	z;
+	size_t	i;
+
+	color_1 = LINE_GRADIENT_COLOR_1;
+	color_2 = LINE_GRADIENT_COLOR_2;
+	min_z = min_z_world(data);
+	max_z = max_z_world(data);
+	a = ((double)color_1 - color_2) / ((double)min_z - max_z);
+	b = ((double)color_2 * min_z - color_1 * max_z) / ((double)min_z - max_z);
+	i = 0;
+	while (i < (size_t)(data->rows * data->cols))
+	{
+		if (data->pixels[i / data->cols][i % data->cols].rgba == 0xffffffff)
+		{
+			z = data->world[i / data->cols][i % data->cols].z;
+			data->pixels[i / data->cols][i % data->cols].rgba = (unsigned int)(a * z + b);
+		}
+		i++;
+	}
 }
