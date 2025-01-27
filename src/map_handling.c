@@ -56,7 +56,7 @@ static int	count_rows_and_columns(t_fdf *data, char *line)
 	{
 		data->rows++;
 		wc = word_count(line);
-		if (wc != wc_o)
+		if (wc > wc_o)
 		{
 			free(line);
 			return (FAILURE);
@@ -102,11 +102,19 @@ static void	assign_row(t_fdf *data, int row, char **words)
 	j = -1;
 	while (++j < data->cols)
 	{
+		if (!words[j])
+			break ;
 		data->map[row][j] = ft_atoi(words[j]);
 		if (ft_strchr(words[j], ','))
 			rgba = atohex(ft_strchr(words[j], ',') + 1) << 8 | 0xff;
 		else
 			rgba = WHITE;
 		data->pixels[row][j].rgba = rgba;
+	}
+	while (j < data->cols)
+	{
+		data->map[row][j] = 0;
+		data->pixels[row][j].rgba = WHITE;
+		j++;
 	}
 }

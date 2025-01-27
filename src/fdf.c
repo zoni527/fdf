@@ -55,7 +55,7 @@ void	set_up_scene(t_fdf *data)
 		free_close_print_exit(data, "ERROR: couldn't create image");
 	if (mlx_image_to_window(data->mlx, data->img, 0, 0) < 0)
 		free_close_print_exit(data, "ERROR: couldn't insert image to window");
-	fill_with_color(data->img, BLACK);
+	fill_with_color(data->img, BG_COLOR);
 }
 
 void	free_close_print_exit(t_fdf *data, const char *error)
@@ -115,31 +115,45 @@ void	free_data(t_fdf *data)
 	free(data->pixels);
 }
 
+void	calculate_channels(t_color *c)
+{
+	c->r = c->rgba >> 24 & 0xff;
+	c->g = c->rgba >> 16 & 0xff;
+	c->b = c->rgba >> 8 & 0xff;
+	c->a = c->rgba & 0xff;
+
+}
+
 void	set_default_gradient(t_fdf *data)
 {
 	double	min_z;
 	double	max_z;
-	unsigned int	color_1;
-	unsigned int	color_2;
-	double	a;
-	double	b;
+	t_color c1;
+	t_color c2;
+	t_color	c3;
+	t_dp3	k;
 	double	z;
 	size_t	i;
 
-	color_1 = LINE_GRADIENT_COLOR_1;
-	color_2 = LINE_GRADIENT_COLOR_2;
+	c1.rgba = LINE_GRADIENT_COLOR_1;
+	c2.rgba = LINE_GRADIENT_COLOR_2;
+	calculate_channels(&c1);
+	calculate_channels(&c2);
 	min_z = min_z_world(data);
 	max_z = max_z_world(data);
-	a = ((double)color_1 - color_2) / ((double)min_z - max_z);
-	b = ((double)color_2 * min_z - color_1 * max_z) / ((double)min_z - max_z);
+	k.x = ((double)c2.r - c1.r) / ((double)max_z - min_z);
+	k.y = ((double)c2.g - c1.g) / ((double)max_z - min_z);
+	k.z = ((double)c2.b - c1.b) / ((double)max_z - min_z);
 	i = 0;
 	while (i < (size_t)(data->rows * data->cols))
 	{
-		if (data->pixels[i / data->cols][i % data->cols].rgba == 0xffffffff)
-		{
-			z = data->world[i / data->cols][i % data->cols].z;
-			data->pixels[i / data->cols][i % data->cols].rgba = (unsigned int)(a * z + b);
-		}
+		z = data->world[i / data->cols][i % data->cols].z;
+		c3.r = (unsigned int)(k.x * (z - min_z) + c1.r);
+		c3.g = (unsigned int)(k.y * (z - min_z) + c1.g);
+		c3.b = (unsigned int)(k.z * (z - min_z) + c1.b);
+		c3.rgba = c3.r << 24 | c3.g << 16 | c3.b << 8 | c3.a;
+		data->pixels[i / data->cols][i % data->cols].rgba = c3.rgba;
 		i++;
 	}
 }
+

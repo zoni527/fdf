@@ -21,11 +21,12 @@
 # define WIDTH	2048
 # define HEIGHT	2048
 
-# define RED	0xff0000ff
-# define GREEN	0x00ff00ff
-# define BLUE	0x0000ffff
-# define WHITE	0xffffffff
-# define BLACK	0x000000ff
+# define RED		0xff0000ff
+# define GREEN		0x00ff00ff
+# define BLUE		0x0000ffff
+# define WHITE		0xffffffff
+# define BLACK		0x000000ff
+# define BG_COLOR	0x111111ff
 
 # define LINE_GRADIENT_COLOR_1	0xffffffff
 # define LINE_GRADIENT_COLOR_2	0x0000ffff
@@ -78,6 +79,16 @@ typedef struct s_fdf
 	double			view_scale;
 	t_dp2			view_offset;
 }	t_fdf;
+
+typedef struct s_color
+
+{
+	unsigned int	rgba;
+	unsigned char	r;
+	unsigned char	g;
+	unsigned char	b;
+	unsigned char	a;
+}	t_color;
 
 /*----------------------------------------------------------------------------*/
 /*                                   fdf.c                                    */

@@ -89,7 +89,7 @@ void	print_colors(t_fdf *data)
 
 void	redraw(t_fdf *data)
 {
-	fill_with_color(data->img, BLACK);
+	fill_with_color(data->img, BG_COLOR);
 	view_to_pixels(data);
 	draw_map(data);
 }
