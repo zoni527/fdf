@@ -66,7 +66,7 @@ static void	translate(t_fdf *data, double offset_x, double offset_y)
 static void	rotate(t_fdf *data, double rx, double ry, double rz)
 {
 	rotate_world(data, rx, ry, rz);
-	y_plane_projection(data);
+	data->project(data);
 	scale_view(data, data->view_scale);
 	rotate_view(data, M_PI);
 	offset_view(data, data->view_offset);

@@ -338,5 +338,25 @@
    "./lib/MLX42/include"
   ],
   "file": "src/input_02.c"
+ },
+ {
+  "directory": "/home/jvarila/Repos/fdf",
+  "arguments": [
+   "cc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-c",
+   "src/default_gradient.c",
+   "-o",
+   "src/default_gradient.o",
+   "-I",
+   "./lib/libft",
+   "-I",
+   "./include",
+   "-I",
+   "./lib/MLX42/include"
+  ],
+  "file": "src/default_gradient.c"
  }
 ]

@@ -29,7 +29,7 @@
 # define BG_COLOR	0x111111ff
 
 # define LINE_GRADIENT_COLOR_1	0xffffffff
-# define LINE_GRADIENT_COLOR_2	0x0000ffff
+# define LINE_GRADIENT_COLOR_2	0x44aaffff
 
 # define SUCCESS	0
 # define FAILURE	-1
@@ -78,6 +78,7 @@ typedef struct s_fdf
 	t_pixel			**pixels;
 	double			view_scale;
 	t_dp2			view_offset;
+	void			(*project)(struct s_fdf *data);
 }	t_fdf;
 
 typedef struct s_color
@@ -128,6 +129,7 @@ void		rotate_dp2(t_dp2 *point, double angle);
 void		y_plane_projection(t_fdf *data);
 void		x_plane_projection(t_fdf *data);
 void		z_plane_projection(t_fdf *data);
+void		oblique_projection(t_fdf *data);
 /* view_manipulation.c -------------------------------------------------------*/
 void		offset_view(t_fdf *data, t_dp2 offset);
 void		scale_view(t_fdf *data, double multiplier);
@@ -164,5 +166,7 @@ void		hook(void *param);
 void		esc_hook(void *param);
 /* input_02.c ----------------------------------------------------------------*/
 void		scroll_hook(double xdelta, double ydelta, void *param);
+void		projection_hook(void *param);
+void		reset_hook(void *param);
 
 #endif

@@ -37,6 +37,7 @@ SRC	:=	$(SRCDIR)/fdf.c \
 		$(SRCDIR)/input_02.c \
 		$(SRCDIR)/line_segment_drawing.c \
 		$(SRCDIR)/pixels_and_colors.c \
+		$(SRCDIR)/default_gradient.c
 
 OBJ		:= $(SRC:.c=.o)
 

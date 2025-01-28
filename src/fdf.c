@@ -29,6 +29,8 @@ int	main(int argc, char *argv[])
 	set_up_scene(&data);
 	draw_map(&data);
 	mlx_loop_hook(data.mlx, &hook, &data);
+	mlx_loop_hook(data.mlx, &reset_hook, &data);
+	mlx_loop_hook(data.mlx, &projection_hook, &data);
 	mlx_loop_hook(data.mlx, &esc_hook, &data);
 	mlx_scroll_hook(data.mlx, &scroll_hook, &data);
 	mlx_loop(data.mlx);
@@ -45,10 +47,11 @@ void	set_up_scene(t_fdf *data)
 	center_world(data);
 	if (no_color_info(data))
 		set_default_gradient(data);
+	data->project = &y_plane_projection;
 	rotate_world(data, 0, 0, 180 * ONE_DEGREE);
 	rotate_world(data, 0, 0, 45 * ONE_DEGREE);
 	rotate_world(data, atan(1 / sqrt(2)), 0, 0);
-	y_plane_projection(data);
+	data->project(data);
 	initialize_pixels(data);
 	data->mlx = mlx_init(WIDTH, HEIGHT, "fdf", 1);
 	if (!data->mlx)

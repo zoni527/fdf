@@ -22,12 +22,14 @@ void	set_default_gradient(t_fdf *data)
 	t_color	c2;
 	t_dp3	k;
 
+	min_z = min_z_world(data);
+	max_z = max_z_world(data);
+	if (min_z == max_z)
+		return ;
 	c1.rgba = LINE_GRADIENT_COLOR_1;
 	c2.rgba = LINE_GRADIENT_COLOR_2;
 	calculate_channels(&c1);
 	calculate_channels(&c2);
-	min_z = min_z_world(data);
-	max_z = max_z_world(data);
 	k.x = ((double)c2.r - c1.r) / ((double)max_z - min_z);
 	k.y = ((double)c2.g - c1.g) / ((double)max_z - min_z);
 	k.z = ((double)c2.b - c1.b) / ((double)max_z - min_z);
@@ -79,4 +81,3 @@ void	calculate_channels(t_color *c)
 	c->b = c->rgba >> 8 & 0xff;
 	c->a = c->rgba & 0xff;
 }
-

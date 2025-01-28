@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "../include/fdf.h"
+#include "libft.h"
 
 static void	assign_map_and_set_pixel_colors(t_fdf *data);
 static void	assign_row(t_fdf *data, int row, char **words);
@@ -20,6 +21,10 @@ int	validate_map_file(const char *file_name, t_fdf *data)
 {
 	char	*line;
 
+	if (!ft_strrchr(file_name, '.')
+		|| ft_strlen(ft_strrchr(file_name, '.')) != 4
+		|| !ft_strnstr(ft_strrchr(file_name, '.'), ".fdf", 4))
+		return (FAILURE);
 	data->fd = open(file_name, O_RDONLY);
 	line = get_next_line(data->fd);
 	if (data->fd < 0 || !line)
