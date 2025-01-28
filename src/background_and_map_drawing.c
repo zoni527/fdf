@@ -12,6 +12,8 @@
 
 #include "../include/fdf.h"
 
+static int	on_screen(const t_pixel *p1, const t_pixel *p2);
+
 void	fill_with_color(mlx_image_t *img, unsigned int rgba)
 {
 	int		w;
@@ -39,52 +41,30 @@ void	draw_map(t_fdf *data)
 		j = -1;
 		while (++j < data->cols - 1)
 		{
-			draw_segment(data, data->pixels[i][j], data->pixels[i + 1][j]);
-			draw_segment(data, data->pixels[i][j], data->pixels[i][j + 1]);
+			if (on_screen(&data->pixels[i][j], &data->pixels[i + 1][j]))
+				draw_segment(data, data->pixels[i][j], data->pixels[i + 1][j]);
+			if (on_screen(&data->pixels[i][j], &data->pixels[i][j + 1]))
+				draw_segment(data, data->pixels[i][j], data->pixels[i][j + 1]);
 		}
 	}
-	j = data->cols -1;
+	j = data->cols - 1;
 	i = -1;
 	while (++i < data->rows - 1)
-		draw_segment(data, data->pixels[i][j], data->pixels[i + 1][j]);
+		if (on_screen(&data->pixels[i][j], &data->pixels[i + 1][j]))
+			draw_segment(data, data->pixels[i][j], data->pixels[i + 1][j]);
 	i = data->rows - 1;
 	j = -1;
 	while (++j < data->cols - 1)
-		draw_segment(data, data->pixels[i][j], data->pixels[i][j + 1]);
+		if (on_screen(&data->pixels[i][j], &data->pixels[i][j + 1]))
+			draw_segment(data, data->pixels[i][j], data->pixels[i][j + 1]);
 }
 
-void	print_map(t_fdf *data)
+static int	on_screen(const t_pixel *p1, const t_pixel *p2)
 {
-	int	i;
-	int	j;
-
-	i = -1;
-	while (++i < data->rows)
-	{
-		j = -1;
-		while (++j < data->cols)
-		{
-			ft_printf("%d ", data->map[i][j]);
-		}
-		ft_printf("\n");
-	}
-}
-
-void	print_colors(t_fdf *data)
-{
-	int	i;
-	int	j;
-
-	i = -1;
-	while (++i < data->rows)
-	{
-		j = -1;
-		while (++j < data->cols)
-		{
-			ft_printf("0x%x ", data->pixels[i][j].rgba);
-		}
-		ft_printf("\n");
-	}
+	if ((p1->x < 0 && p2->x < 0) || (p1->x > WIDTH && p2->x > WIDTH)
+		|| (p1->y < 0 && p2->y < 0) || (p1->y > HEIGHT && p2->y > HEIGHT))
+		return (0);
+	return (1);
 }
 
 void	redraw(t_fdf *data)

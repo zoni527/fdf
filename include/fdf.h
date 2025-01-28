@@ -152,13 +152,11 @@ int			interpolate_channel(int p1_c, int p2_c, double distance, int index);
 /* background_and_map_drawing.c ----------------------------------------------*/
 void		fill_with_color(mlx_image_t *img, unsigned int rgba);
 void		draw_map(t_fdf *data);
-void		print_map(t_fdf *data);
-void		print_colors(t_fdf *data);
 void		redraw(t_fdf *data);
 /* default_gradient.c --------------------------------------------------------*/
-void	set_default_gradient(t_fdf *data);
-void	interpolate_default_gradient(t_fdf *data, t_color c1, t_dp3 k);
-int		no_color_info(t_fdf *data);
+void		set_default_gradient(t_fdf *data);
+void		interpolate_default_gradient(t_fdf *data, t_color c1, t_dp3 k);
+int			no_color_info(t_fdf *data);
 /* line_segment_drawing.c ----------------------------------------------------*/
 void		draw_segment(t_fdf *data, t_pixel p1, t_pixel p2);
 /* input_01.c ----------------------------------------------------------------*/
@@ -167,6 +165,14 @@ void		esc_hook(void *param);
 /* input_02.c ----------------------------------------------------------------*/
 void		scroll_hook(double xdelta, double ydelta, void *param);
 void		projection_hook(void *param);
+void		scale_z_hook(void *param);
 void		reset_hook(void *param);
+/* non_uniform_scaling.c -----------------------------------------------------*/
+void		scale_world_x(t_fdf *data, double multiplier);
+void		scale_world_y(t_fdf *data, double multiplier);
+void		scale_world_z(t_fdf *data, double multiplier);
+/* data_printing.c -----------------------------------------------------------*/
+void		print_map(const t_fdf *data);
+void		print_colors(const t_fdf *data);
 
 #endif

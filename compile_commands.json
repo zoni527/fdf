@@ -358,5 +358,45 @@
    "./lib/MLX42/include"
   ],
   "file": "src/default_gradient.c"
+ },
+ {
+  "directory": "/home/jvarila/Repos/fdf",
+  "arguments": [
+   "cc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-c",
+   "src/non_uniform_scaling.c",
+   "-o",
+   "src/non_uniform_scaling.o",
+   "-I",
+   "./lib/libft",
+   "-I",
+   "./include",
+   "-I",
+   "./lib/MLX42/include"
+  ],
+  "file": "src/non_uniform_scaling.c"
+ },
+ {
+  "directory": "/home/jvarila/Repos/fdf",
+  "arguments": [
+   "cc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-c",
+   "src/data_printing.c",
+   "-o",
+   "src/data_printing.o",
+   "-I",
+   "./lib/libft",
+   "-I",
+   "./include",
+   "-I",
+   "./lib/MLX42/include"
+  ],
+  "file": "src/data_printing.c"
  }
 ]

@@ -61,8 +61,8 @@ void	stretch_view_to_window_scale(t_fdf *data)
 	double	ratio_x;
 	double	ratio_y;
 
-	ratio_x = 1;
-	ratio_y = 1;
+	ratio_x = INFINITY;
+	ratio_y = INFINITY;
 	data->view_scale = 1;
 	width_x = max_x_view(data) - min_x_view(data);
 	width_y = max_y_view(data) - min_y_view(data);

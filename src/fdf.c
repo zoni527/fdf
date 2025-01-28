@@ -31,6 +31,7 @@ int	main(int argc, char *argv[])
 	mlx_loop_hook(data.mlx, &hook, &data);
 	mlx_loop_hook(data.mlx, &reset_hook, &data);
 	mlx_loop_hook(data.mlx, &projection_hook, &data);
+	mlx_loop_hook(data.mlx, &scale_z_hook, &data);
 	mlx_loop_hook(data.mlx, &esc_hook, &data);
 	mlx_scroll_hook(data.mlx, &scroll_hook, &data);
 	mlx_loop(data.mlx);
