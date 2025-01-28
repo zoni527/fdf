@@ -267,26 +267,6 @@
    "-Wextra",
    "-Werror",
    "-c",
-   "src/input.c",
-   "-o",
-   "src/input.o",
-   "-I",
-   "./lib/libft",
-   "-I",
-   "./include",
-   "-I",
-   "./lib/MLX42/include"
-  ],
-  "file": "src/input.c"
- },
- {
-  "directory": "/home/jvarila/Repos/fdf",
-  "arguments": [
-   "cc",
-   "-Wall",
-   "-Wextra",
-   "-Werror",
-   "-c",
    "src/line_segment_drawing.c",
    "-o",
    "src/line_segment_drawing.o",
@@ -318,5 +298,45 @@
    "./lib/MLX42/include"
   ],
   "file": "src/pixels_and_colors.c"
+ },
+ {
+  "directory": "/home/jvarila/Repos/fdf",
+  "arguments": [
+   "cc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-c",
+   "src/input_01.c",
+   "-o",
+   "src/input_01.o",
+   "-I",
+   "./lib/libft",
+   "-I",
+   "./include",
+   "-I",
+   "./lib/MLX42/include"
+  ],
+  "file": "src/input_01.c"
+ },
+ {
+  "directory": "/home/jvarila/Repos/fdf",
+  "arguments": [
+   "cc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-c",
+   "src/input_02.c",
+   "-o",
+   "src/input_02.o",
+   "-I",
+   "./lib/libft",
+   "-I",
+   "./include",
+   "-I",
+   "./lib/MLX42/include"
+  ],
+  "file": "src/input_02.c"
  }
 ]

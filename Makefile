@@ -33,7 +33,8 @@ SRC	:=	$(SRCDIR)/fdf.c \
 		$(SRCDIR)/2d_point_manipulation.c \
 		$(SRCDIR)/3d_point_manipulation.c \
 		$(SRCDIR)/background_and_map_drawing.c \
-		$(SRCDIR)/input.c \
+		$(SRCDIR)/input_01.c \
+		$(SRCDIR)/input_02.c \
 		$(SRCDIR)/line_segment_drawing.c \
 		$(SRCDIR)/pixels_and_colors.c \
 
