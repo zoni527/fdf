@@ -1,17 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   map_handling.c                                     :+:      :+:    :+:   */
+/*   map_handling_bonus.c                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jvarila <jvarila@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 13:25:32 by jvarila           #+#    #+#             */
-/*   Updated: 2025/01/15 13:37:31 by jvarila          ###   ########.fr       */
+/*   Updated: 2025/01/29 11:12:25 by jvarila          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/fdf.h"
-#include "libft.h"
 
 static void	assign_map_and_set_pixel_colors(t_fdf *data);
 static void	assign_row(t_fdf *data, int row, char **words);

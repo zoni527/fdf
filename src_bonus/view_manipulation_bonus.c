@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   view_manipulation.c                                :+:      :+:    :+:   */
+/*   view_manipulation_bonus.c                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jvarila <jvarila@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/23 13:05:10 by jvarila           #+#    #+#             */
-/*   Updated: 2025/01/23 13:09:45 by jvarila          ###   ########.fr       */
+/*   Created: 2025/01/29 12:08:31 by jvarila           #+#    #+#             */
+/*   Updated: 2025/01/29 12:08:39 by jvarila          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,9 +72,9 @@ void	stretch_view_to_window_scale(t_fdf *data)
 		ratio_x = WIDTH / width_x;
 	if (width_y != 0)
 		ratio_y = WIDTH / width_y;
-	if (ratio_x == 1)
+	if (ratio_x == INFINITY)
 		data->view_scale = ratio_y;
-	if (ratio_y == 1)
+	if (ratio_y == INFINITY)
 		data->view_scale = ratio_x;
 	if (ratio_y < ratio_x)
 		data->view_scale = ratio_y;

@@ -1,26 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   fdf.c                                              :+:      :+:    :+:   */
+/*   fdf_bonus.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jvarila <jvarila@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 09:42:50 by jvarila           #+#    #+#             */
-/*   Updated: 2025/01/13 09:45:21 by jvarila          ###   ########.fr       */
+/*   Updated: 2025/01/29 11:13:18 by jvarila          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/fdf.h"
-
-void	set_default_gradient(t_fdf *data);
-void	interpolate_default_gradient(t_fdf *data, t_color c1, t_dp3 k);
 
 int	main(int argc, char *argv[])
 {
 	t_fdf	data;
 
 	if (argc != 2)
-		return (write_error_return_int("Usage: ./fdf <map_name>.fdf", 1));
+		return (write_error_return_int("Usage: ./fdf_bonus <map_name>.fdf", 1));
 	ft_memset(&data, 0, sizeof(t_fdf));
 	if (validate_map_file(argv[1], &data) == FAILURE)
 		free_close_print_exit(&data, "ERROR: couldn't validate map file");

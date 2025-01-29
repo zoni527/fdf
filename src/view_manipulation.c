@@ -72,9 +72,9 @@ void	stretch_view_to_window_scale(t_fdf *data)
 		ratio_x = WIDTH / width_x;
 	if (width_y != 0)
 		ratio_y = WIDTH / width_y;
-	if (ratio_x == 1)
+	if (ratio_x == INFINITY)
 		data->view_scale = ratio_y;
-	if (ratio_y == 1)
+	if (ratio_y == INFINITY)
 		data->view_scale = ratio_x;
 	if (ratio_y < ratio_x)
 		data->view_scale = ratio_y;

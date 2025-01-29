@@ -12,9 +12,6 @@
 
 #include "../include/fdf.h"
 
-void	set_default_gradient(t_fdf *data);
-void	interpolate_default_gradient(t_fdf *data, t_color c1, t_dp3 k);
-
 int	main(int argc, char *argv[])
 {
 	t_fdf	data;
@@ -28,12 +25,7 @@ int	main(int argc, char *argv[])
 	parse_map_file(argv[1], &data);
 	set_up_scene(&data);
 	draw_map(&data);
-	mlx_loop_hook(data.mlx, &hook, &data);
-	mlx_loop_hook(data.mlx, &reset_hook, &data);
-	mlx_loop_hook(data.mlx, &projection_hook, &data);
-	mlx_loop_hook(data.mlx, &scale_z_hook, &data);
 	mlx_loop_hook(data.mlx, &esc_hook, &data);
-	mlx_scroll_hook(data.mlx, &scroll_hook, &data);
 	mlx_loop(data.mlx);
 	mlx_terminate(data.mlx);
 	free_data(&data);

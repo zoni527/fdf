@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include "../include/fdf.h"
-#include "libft.h"
 
 static void	assign_map_and_set_pixel_colors(t_fdf *data);
 static void	assign_row(t_fdf *data, int row, char **words);
