@@ -77,12 +77,13 @@ static void	assign_map_and_set_pixel_colors(t_fdf *data)
 	char	*line;
 	char	**words;
 	int		i;
-	int		j;
 
 	i = -1;
 	while (++i < data->rows)
 	{
 		line = get_next_line(data->fd);
+		if (!line)
+			free_close_print_exit(data, "ERROR: malloc fail in get_next_line");
 		words = ft_split(line, ' ');
 		if (!words)
 		{
@@ -90,10 +91,7 @@ static void	assign_map_and_set_pixel_colors(t_fdf *data)
 			free_close_print_exit(data, "ERROR: malloc fail in split");
 		}
 		assign_row(data, i, words);
-		j = -1;
-		while (++j < data->cols)
-			free(words[j]);
-		free(words);
+		free_split(&words);
 		free(line);
 	}
 }
