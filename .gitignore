@@ -52,3 +52,8 @@ Mkfile.old
 dkms.conf
 
 fdf
+fdf_bonus
+.cache
+compile_commands.json
+lib/MLX42
+
