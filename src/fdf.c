@@ -24,6 +24,7 @@ int	main(int argc, char *argv[])
 	allocate_data(&data);
 	parse_map_file(argv[1], &data);
 	set_up_scene(&data);
+	print_controls();
 	draw_map(&data);
 	mlx_loop_hook(data.mlx, &esc_hook, &data);
 	mlx_loop(data.mlx);
@@ -34,15 +35,12 @@ int	main(int argc, char *argv[])
 
 void	set_up_scene(t_fdf *data)
 {
-	print_map(data);
-	print_colors(data);
 	assign_world(data);
 	center_world(data);
 	if (no_color_info(data))
 		set_default_gradient(data);
 	data->project = &y_plane_projection;
-	rotate_world(data, 0, 0, 180 * ONE_DEGREE);
-	rotate_world(data, 0, 0, 45 * ONE_DEGREE);
+	rotate_world(data, 0, 0, 225 * ONE_DEGREE);
 	rotate_world(data, atan(1 / sqrt(2)), 0, 0);
 	data->project(data);
 	initialize_pixels(data);

@@ -41,3 +41,14 @@ void	print_colors(const t_fdf *data)
 		ft_printf("\n");
 	}
 }
+
+void	print_controls(void)
+{
+	ft_putendl("Exit: ESC");
+	ft_putendl("Translation: UP DOWN LEFT RIGHT");
+	ft_putendl("Rotation: W A S D Q E");
+	ft_putendl("Reset: R");
+	ft_putendl("Projections (press R after): X Y Z O");
+	ft_putendl("Global Z scaling: - =");
+	ft_putendl("Zoom: mouse scroll wheel");
+}

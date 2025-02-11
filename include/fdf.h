@@ -174,5 +174,6 @@ void		scale_world_z(t_fdf *data, double multiplier);
 /* data_printing.c -----------------------------------------------------------*/
 void		print_map(const t_fdf *data);
 void		print_colors(const t_fdf *data);
+void		print_controls(void);
 
 #endif

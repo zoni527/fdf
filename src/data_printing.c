@@ -41,3 +41,8 @@ void	print_colors(const t_fdf *data)
 		ft_printf("\n");
 	}
 }
+
+void	print_controls(void)
+{
+	ft_putendl("Exit: ESC");
+}
